@@ -61,6 +61,22 @@ processing; installation and explicit reference retrieval are separate operation
 
 ## Development and verification
 
+Upstream repositories are pinned as Git submodules:
+
+| Submodule | Pin | Purpose |
+| --- | --- | --- |
+| `vendor/oh-my-pi` | `v18.3.2` | Assistant source, protocol documentation and upstream license. |
+| `vendor/obsidian-releases` | `v1.13.7` | Official Obsidian release metadata; the desktop application is closed-source. |
+
+Clone with `git clone --recurse-submodules <repository-url>`, or run
+`git submodule update --init --recursive` in an existing checkout. The parent
+repository records exact commits; updating a submodule does not automatically
+upgrade the packaged application. Setup still downloads the checksum-pinned
+Windows releases in `packaging/downloads.json` and verifies Obsidian's publisher.
+Submodule checkouts are for upstream reference and maintenance; they are not
+installed or required to run Photo Studio. Runtime licenses/notices remain in
+the installer, and user vaults and assistant profiles stay outside the submodules.
+
 See [build/setup and architecture](docs/DESKTOP.md),
 [capability coverage](docs/CAPABILITIES.md),
 [upstream provenance](desktop/UPSTREAM.md), and
@@ -69,3 +85,38 @@ Third-party notices and pinned download manifests are included in the repository
 Windows CI builds an NSIS installer and checksums; version tags publish release
 assets. Signing requires configured certificate secrets. Unsigned builds remain
 unsigned, regardless of generic signing messages in the packaging log.
+
+## Integration and roadmap
+
+**Current integration:** the desktop talks to Python through private stdio IPC.
+Python controls Oh My Pi through its RPC interface, and an explicitly loaded
+extension calls a restricted, authenticated local photo-tool broker. Obsidian
+opens a dedicated local Markdown vault. These connections do not currently use
+MCP (Model Context Protocol); project-provided MCP configuration is disabled in
+the isolated assistant profile.
+
+The following are planned work, not capabilities of the current release:
+
+- **MCP interoperability:** expose selected existing photo and vault tools through
+  an optional local MCP server for compatible assistants. Reuse the current Python
+  operations and their path authorization, original preservation, cancellation
+  and reconstruction opt-ins. Start with inspection and explicit file selection;
+  add editing only with the same safeguards. Remote servers and arbitrary tools
+  require a separate permissions design. MCP standardizes tool access; it does
+  not replace processing models or improve image quality by itself.
+- **Video editing:** begin with local import/probing, timeline trim/split, audio
+  sync, proxy playback and explicit export presets. Keep originals and edit
+  decisions separate, with cancellable jobs and verified duration, timestamps,
+  frame rate, audio and color metadata. Evaluate FFmpeg-based processing and its
+  distribution licenses before choosing a dependency. Add restoration/upscaling
+  only after motion, temporal consistency, flicker and VRAM tests pass; applying
+  photo models independently to frames is not sufficient.
+- **Higher-quality photo outputs:** retain today's full-resolution, 16-bit sRGB
+  TIFF and optional layered PSD/PSB exports. Benchmark denoise, deblur and upscale
+  choices on representative paired samples and native-pixel crops, checking fine
+  texture, halos, face identity, color and tile seams. Plan a floating-point
+  working pipeline to reduce repeated rounding, wider-gamut ICC-managed export,
+  and separately validated HDR support. Add explicit quality/time/VRAM choices
+  only where tests show a useful improvement. Larger dimensions or bit depth
+  alone do not recover lost detail; the current 8-bit preview is separate from
+  the saved high-precision output.

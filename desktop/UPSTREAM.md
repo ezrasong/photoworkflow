@@ -29,6 +29,16 @@ assistant, coding tools, providers, terminal and telemetry are not included.
 Oh My Pi 18.3.2 uses its documented --mode rpc --no-ui interface, protocol v1
 bounded NDJSON, with actual message, tool, progress and prompt_result events.
 
+The assistant source is also available as the `vendor/oh-my-pi` Git submodule,
+pinned to `v18.3.2` (`7853b4e499936f9dcc13c9b64adb55f6b342aabf`).
+`vendor/obsidian-releases` pins official release metadata to `v1.13.7`
+(`11fc3ae2320769a5db81b9029ab644928540f9b8`); it does not contain Obsidian's
+closed-source desktop application. Both live at the repository root, outside
+mutable runtime data. Their exact gitlinks support upstream inspection; runtime
+setup continues to use verified release artifacts rather than source builds.
+The release-specific Oh My Pi notices under `packaging/seed/apps/oh-my-pi` remain
+necessary for distribution and are intentionally retained.
+
 The pinned upstream does not provide a reusable public-web browser component in
 these surfaces. The reference browser uses Electron's native WebContentsView in a
 separate session without a preload or photo bridge. It is a first-party addition.

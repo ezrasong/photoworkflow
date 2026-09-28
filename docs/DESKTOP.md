@@ -74,6 +74,14 @@ is necessary; existing user notes are never rewritten for branding.
 
 ## Build
 
+Use `git submodule update --init --recursive` to populate the pinned Oh My Pi
+source and Obsidian release-metadata repositories under `vendor/`. These are
+upstream reference checkouts, not build inputs or mutable application directories.
+The installer remains reproducible from the pinned release manifests without
+fetching the submodules. To upgrade either application, review its upstream
+changes, update the gitlink and release/version/hash pins together, retain the
+matching distribution notices, and repeat setup/integration acceptance checks.
+
 Use Node 22, Python 3.12+ and uv 0.12.13 on Windows x64. Download
 selective_scan_cuda.pyd from the private repository's native-runtime-v1 release.
 The bundle builder verifies its pinned SHA-256. Reproduction source and Windows
