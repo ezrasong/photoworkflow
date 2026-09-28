@@ -151,7 +151,7 @@ class ReviewPanel:
         self.changes.configure(state='disabled');self.changes.yview_moveto(0)
         self.pixels.clear();self.images.clear();self.center=[.5,.5]
         try:
-            before=workspace_path(Path(item['output'])/'original.tif')
+            before=workspace_path(item.get('baseline',Path(item['output'])/'original.tif'))
             after=workspace_path(item['tiff'])
             self.pixels=[decode_working(p.read_bytes())[0] for p in (before,after)]
         except Exception as error:

@@ -9,6 +9,7 @@ Advanced panels use the same packaged Python and persistent workspace.
 | Local visual inspection | Conversation | vision, chat |
 | Tone, warmth, tint, contrast, shadows/highlights, saturation | Photo controls; advanced recipe; precision editor | edits, pipeline |
 | SCUNet / DRUNet, sigma, masked denoise | Controls; recipe; precision editor | edits |
+| Mild out-of-focus correction, radius/strength, regional mask | Correct soft focus; conversation; recipe | focus, edits |
 | MambaIRv2 / Real-ESRGAN 2×/4×, detail blend | Natural upscale; conversation | mambair, models |
 | Face restoration single/batch/watch, bit depth, subject map | Controls; precision editor for 8-bit opt-in and mapping | harness, pipeline |
 | Paint/import/erase masks; clone donor | Precision editor & masks | edit_panel |
@@ -16,7 +17,9 @@ Advanced panels use the same packaged Python and persistent workspace.
 | Big-LaMa removal, selected GFPGAN faces, opt-in enforcement | Explicit conversation/manual recipe | unified_batch, selection, inpainting |
 | Lightroom native Develop, curves, crop, lens, denoise | Conversation; advanced native batch | lightroom plug-in, native_batch |
 | Photoshop local curves/clone, layered TIFF/PSD/PSB | Conversation; Results export | photoshop_local, photoshop |
-| Before/after, Fit/100%, pan, navigation, What changed | Results and Full resolution review | review_panel |
+| Before/after split, Fit/100%, pan, navigation, What changed | Embedded Results tab; native review retained for advanced workflows | photo-review, imaging, review_panel |
+| Automatic local prompt correction, original/corrected history | Composer and Prompt Master tab | prompt_master, chat authorization boundary |
+| Public website reference browsing | Embedded Browser tab | Isolated Electron WebContentsView |
 | HEIC/HEIF SDR preparation; RAW/DNG | Assistant selection | heif, native_batch |
 | Local references and selected vault notes | Composer context buttons | references, vault, chat |
 | Explicit Commons search with attribution | Search references opens local chooser; query sent only on Search | reference_browser, public_references |

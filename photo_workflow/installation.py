@@ -1,10 +1,12 @@
 """Explicit, resumable setup. Never imported by an inference worker."""
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import urllib.request
 import zipfile
+import zlib
 
 from .runtime import CODE_ROOT, ROOT, json_write, sha256
 
@@ -68,6 +70,11 @@ def extract_wheel(path, cancelled):
             target=(folder/member.filename).resolve()
             if not target.is_relative_to(folder.resolve()):raise ValueError('Unsafe wheel member')
             if member.is_dir():continue
+            if target.is_file() and target.stat().st_size==member.file_size:
+                crc=0
+                with target.open('rb') as current:
+                    for block in iter(lambda:current.read(4*1024*1024),b''):crc=zlib.crc32(block,crc)
+                if crc==member.CRC:continue
             target.parent.mkdir(exist_ok=True,parents=True)
             temp=target.with_name(target.name+'.installing')
             with archive.open(member) as src,temp.open('wb') as out:shutil.copyfileobj(src,out)
@@ -119,8 +126,8 @@ def install(group, emit, marker):
         # Reuse the pinned portable extraction and publisher check. No system install.
         flags={'creationflags':subprocess.CREATE_NO_WINDOW}
         signature=subprocess.run(['powershell.exe','-NoProfile','-Command',
-            '$s=Get-AuthenticodeSignature -LiteralPath $args[0]; if ($s.Status -ne "Valid" -or $s.SignerCertificate.Subject -notlike "*O=Dynalist Inc*") {exit 1}',
-            str(ROOT/'.cache/Obsidian-1.13.7.exe')],capture_output=True,**flags)
+            '$s=Get-AuthenticodeSignature -LiteralPath $env:PHOTO_OBSIDIAN_INSTALLER; if ($s.Status -ne "Valid" -or $s.SignerCertificate.Subject -notlike "*O=Dynalist Inc*") {exit 1}'],
+            env={**os.environ,'PHOTO_OBSIDIAN_INSTALLER':str(ROOT/'.cache/Obsidian-1.13.7.exe')},capture_output=True,**flags)
         if signature.returncode:raise ValueError('Obsidian publisher signature validation failed')
         commands=[
             [str(ROOT/'.cache/7zr.exe'),'x',str(ROOT/'.cache/7z2603-x64.exe'),'-o'+str(ROOT/'.cache/7zip'),'-y'],

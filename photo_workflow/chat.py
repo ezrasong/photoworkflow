@@ -190,7 +190,7 @@ class Workspace:
             run=subprocess.run([sys.executable,'-m','photo_workflow','upscale',str(source),'--scale',str(args['scale']),
                                 '--detail-strength',str(strength),'--model',model,'--output',str(out)],cwd=ROOT,
                                env=dict(os.environ,**({'PHOTOWORKFLOW_CANCEL_FILE':str(cancel_file)} if cancel_file else {})),
-                               capture_output=True,text=True,encoding='utf-8',timeout=900,creationflags=subprocess.CREATE_NO_WINDOW)
+                               stdin=subprocess.DEVNULL,capture_output=True,text=True,encoding='utf-8',timeout=900,creationflags=subprocess.CREATE_NO_WINDOW)
             if run.returncode:raise RuntimeError((run.stderr or run.stdout)[-3000:])
             lines=[x.split(' ',1)[1] for x in run.stdout.splitlines() if x.startswith(('DONE ','EXISTING '))]
             if len(lines)!=1:raise RuntimeError('Upscale worker returned no unique result')
@@ -256,7 +256,7 @@ class Workspace:
                 reconstruction_only = ((isinstance(args.get('inpaint'), dict) and 'target' in args['inpaint'])
                                        or isinstance(args.get('restore_faces'), dict))
                 neutral = all(args.get(k, v) == v for k, v in DEFAULTS.items() if k != 'noise_sigma')
-                if not reconstruction_only or not neutral:
+                if not reconstruction_only or not neutral or args.get('focus', {}).get('strength', 0):
                     raise ValueError('Automatic tone/denoise scope requires a selection')
             values = dict({k: v for k, v in args.items() if k != 'scope'}, denoise_model=args.get('denoise_model', 'scunet'))
             if scope == 'user_mask': values['grade_mask'] = str(self.mask)
@@ -276,7 +276,7 @@ class Workspace:
                 from .unified_batch import authorize_reconstruction
                 authorize_reconstruction(getattr(self, 'request_prompt', ''), values)
             recipe = validate_recipe(values)
-            if 'selection' in recipe and not any(recipe[k] != DEFAULTS[k] for k in DEFAULTS if k != 'noise_sigma') and not any(k in recipe for k in ('inpaint', 'restore_faces')):
+            if 'selection' in recipe and not any(recipe[k] != DEFAULTS[k] for k in DEFAULTS if k != 'noise_sigma') and not any(k in recipe for k in ('inpaint', 'restore_faces')) and not recipe.get('focus', {}).get('strength', 0):
                 raise ValueError('Selection has no requested edit. Include exposure, tone/color or denoise amount; no pixels changed.')
             control = ROOT / '.cache/control'; control.mkdir(exist_ok=True, parents=True)
             path = control / (uuid.uuid4().hex + '.json'); json_write(path, recipe)
@@ -285,7 +285,7 @@ class Workspace:
                 run = subprocess.run([sys.executable, '-m', 'photo_workflow', 'edit', str(self.source),
                                       '--recipe', str(path), '--output', str(output)], cwd=ROOT,
                                      env=dict(os.environ, **({'PHOTOWORKFLOW_CANCEL_FILE': str(cancel_file)} if cancel_file else {})),
-                                     capture_output=True, text=True, encoding='utf-8',
+                                     stdin=subprocess.DEVNULL, capture_output=True, text=True, encoding='utf-8',
                                      creationflags=subprocess.CREATE_NO_WINDOW, timeout=900)
                 if run.returncode: raise RuntimeError((run.stderr or run.stdout)[-3000:])
                 paths = [line.split(' ', 1)[1] for line in run.stdout.splitlines() if line.startswith(('DONE ', 'EXISTING '))]
@@ -315,6 +315,7 @@ class Broker(ThreadingHTTPServer):
         self.failures = []
         self.active_calls = {}
         self.cancelled_calls = set()
+        self.desktop_prompt = None
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -334,6 +335,12 @@ class Handler(BaseHTTPRequestHandler):
             if not 0 < length <= 500000: raise ValueError('Request too large')
             data = json.loads(self.rfile.read(length))
             if self.path == '/prompt' and getattr(self.server.workspace, 'batch_chat', False):
+                if self.server.desktop_prompt is not None:
+                    forwarded, original = self.server.desktop_prompt
+                    if data['prompt'] != forwarded:
+                        raise ValueError('Desktop prompt does not match the accepted submission')
+                    data['prompt'] = original
+                    self.server.desktop_prompt = None
                 return self.respond(200, self.server.workspace.accept_prompt(data['submission'], data['prompt']))
             if self.path == '/progress' and getattr(self.server.workspace, 'batch_chat', False):
                 return self.respond(200, {'progress': self.server.workspace.progress})
@@ -407,7 +414,7 @@ def control(workspace, action):
         try:
             picker_action = 'native_photo' if action == 'photo' and getattr(workspace, 'batch_chat', False) else action
             subprocess.run([sys.executable, '-m', 'photo_workflow.chat', '--pick', picker_action, '--pick-output', str(target)],
-                           cwd=ROOT, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
+                           cwd=ROOT, stdin=subprocess.DEVNULL, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
             selected = json.loads(target.read_text())
             if selected:
                 if action == 'photo': workspace.select_source(selected)
@@ -436,7 +443,7 @@ def choose_references(workspace, query):
     target=ROOT/'.cache/control'/(uuid.uuid4().hex+'.json');target.parent.mkdir(parents=True,exist_ok=True)
     try:
         subprocess.run([sys.executable,'-m','photo_workflow.reference_browser','--output',str(target),'--query',query],
-                       cwd=ROOT,check=True,creationflags=subprocess.CREATE_NO_WINDOW)
+                       cwd=ROOT,stdin=subprocess.DEVNULL,check=True,creationflags=subprocess.CREATE_NO_WINDOW)
         selected=json.loads(target.read_text())
         if not isinstance(selected,list) or len(selected)>3:raise ValueError('Select up to three references')
         workspace.select_references(selected)

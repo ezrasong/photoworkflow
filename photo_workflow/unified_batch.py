@@ -18,6 +18,13 @@ Order: Lightroom edits, Photoshop local work, optional edit_photo, optional upsc
 Each stage is optional; use only what the user requested. Upscale-only needs no Develop edit.
 Use edit_photo for requests for local/AI denoising. Default denoise_model=scunet
 (SCUNet real_psnr); use denoise_model=drunet only when explicitly requested.
+For an explicit out-of-focus/deblur request use edit_photo focus={radius:1,strength:0.35}
+as a conservative starting point. Radius is estimated Gaussian blur sigma in source
+pixels (0.4–3); strength is 0–0.75. This is local non-generative deconvolution for mild
+defocus, not reliable recovery of severe blur or motion blur. Inspect at 100% and
+report remaining softness/halos honestly. Focus uses the grade selection/mask when
+supplied; automatic regional focus requires selection. Never substitute face
+reconstruction or upscale for focus correction. Omit focus unless requested.
 Denoise strength is a 0 to 1 blend; noise_sigma affects DRUNet only.
 For whole-image denoising use scope=whole_image, exposure=0, denoise_scope=whole_image,
 the requested denoise strength, and OMIT selection entirely. There is no category named none.

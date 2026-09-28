@@ -17,12 +17,24 @@ is committed in package-lock.json.
 | packages/desktop/src/preload/index.ts | contextBridge, event unsubscribe and webUtils pattern adapted to photo-only IPC. |
 | packages/ui/src/components/spinner.tsx, spinner.css | Actual upstream Solid component used for assistant/job activity. |
 | packages/ui/src/components/resize-handle.tsx | Actual upstream resizable detail component, with keyboard separator controls supplied at its call site. |
+| packages/ui/src/components/{tabs,button,icon,icon-button}.{tsx,css} | Copied upstream components and styles under src/renderer/upstream, used directly. Kobalte supplies their existing accessible behavior. |
+| packages/ui/src/styles/{base,theme,colors}.css | Actual upstream tokens and color palette. Theme selector adapted from OS media query to the saved application preference. |
+| packages/app/src/pages/layout/sidebar-shell.tsx | Rail and collapsible-panel structure adapted in components/sidebar-shell.tsx. Git worktrees, drag sorting and coding context replaced by photo workspace/session actions. |
 
-Session navigation, conversation, composer and detail panels retain the interaction
-model while their domain implementation is first-party photo UI. OpenCode's
+The rail, neutral theme, compact titlebar, conversation/composer and tabbed side
+panel follow the pinned OpenCode desktop structure. Photo controls and embedded
+pixel comparison are first-party domain views. This is an adapted interface,
+not a claim of pixel-for-pixel parity across every OpenCode screen. OpenCode's
 assistant, coding tools, providers, terminal and telemetry are not included.
 Oh My Pi 18.3.2 uses its documented --mode rpc --no-ui interface, protocol v1
 bounded NDJSON, with actual message, tool, progress and prompt_result events.
+
+The pinned upstream does not provide a reusable public-web browser component in
+these surfaces. The reference browser uses Electron's native WebContentsView in a
+separate session without a preload or photo bridge. It is a first-party addition.
+Prompt Master adapts the locally supplied skill's intent-preserving rewrite
+guidance into one bounded local Qwen request; no Codex/cloud call or skill install
+is required at runtime.
 
 The original MIT notice is preserved verbatim in vendor/opencode/LICENSE and
 copied into the installed backend/licenses folder.

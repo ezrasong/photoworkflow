@@ -15,7 +15,13 @@ Create a session, choose a photo/folder, then describe your edit. Manual tone,
 denoise, upscale and restoration controls run directly through Python. Advanced
 precision panels retain mask painting, clone donors, recipe loading, batch/watch,
 reference search, person mappings and vault operations. Review completed results
-in the app or its full-resolution local comparison.
+in the embedded before/after tab, including native-pixel view and panning.
+Every desktop conversation prompt passes through local Prompt Master correction;
+original and corrected text remain visible. The original controls permissions.
+A separate in-app reference browser is available beside the conversation.
+For mildly out-of-focus photos choose **Correct soft focus**, adjust blur radius
+and correction strength, and compare at 100%. Local deconvolution can improve
+recoverable softness; it cannot reliably recover severe defocus or motion blur.
 
 Photos, outputs, models, notes and settings live in a separate AppData workspace.
 Originals and existing results are preserved. Upgrades and uninstall preserve user

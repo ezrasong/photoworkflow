@@ -5,6 +5,7 @@ import { randomUUID, createHash } from 'node:crypto'
 import { promises as fs } from 'node:fs'
 import { join, resolve, relative, isAbsolute, extname } from 'node:path'
 import { createWindow, registerRendererProtocol, trusted } from './windows'
+import { referenceBrowser } from './browser'
 
 let win:ReturnType<typeof createWindow>
 let backend:ChildProcessWithoutNullStreams
@@ -13,7 +14,7 @@ let busy=false
 const selected=new Set<string>()
 const pending=new Map<string,{resolve:(value:any)=>void,reject:(error:Error)=>void}>()
 const resources=app.isPackaged?join(process.resourcesPath,'backend'):resolve(__dirname,'../../../.cache/packaging/bundle')
-const home=process.env.PHOTOWORKFLOW_HOME || join(app.getPath('userData'),'Workspace')
+let home=process.env.PHOTOWORKFLOW_HOME || join(app.getPath('userData'),'Workspace')
 const allowed=new Set(['status','results','cancel','setup','session','prompt','select','process','export','panel','person','settings','review','obsidian','references'])
 function inside(base:string,path:string){const r=relative(resolve(base),resolve(path));return !r.startsWith('..')&&!isAbsolute(r)}
 function send(method:string,args:any={}) {
@@ -51,6 +52,8 @@ function validateCaller(event:Electron.IpcMainInvokeEvent){if(event.sender!==win
 async function start(){
   await seed()
   registerRendererProtocol();win=createWindow()
+  const browser=referenceBrowser(win)
+  ipcMain.handle('photo:browser',(event,action,args)=>{validateCaller(event);return browser(action,args)})
   const env={...process.env,PHOTOWORKFLOW_HOME:home,PYTHONPATH:resources+';'+join(home,'runtime/python-libs'),PYTHONNOUSERSITE:'1',PYTHONDONTWRITEBYTECODE:'1',PYTHONUTF8:'1'}
   delete (env as any).PYTHONHOME
   backend=spawn(join(resources,'python/python.exe'),['-u','-m','photo_workflow.desktop'],{cwd:resources,env,windowsHide:true,stdio:'pipe'})
@@ -60,6 +63,9 @@ async function start(){
       const value=JSON.parse(line)
       if(value.event){
         const t=value.event.type
+        // Windows MSIX can redirect AppData for the owned Python child. Use its
+        // resolved workspace for output grants instead of comparing path aliases.
+        if(t==='backend_ready'&&typeof value.event.home==='string'&&isAbsolute(value.event.home))home=value.event.home
         if(['agent_start'].includes(t))busy=true
         if(['prompt_result','job_end','setup_complete'].includes(t))busy=false
         if(!win.isDestroyed())win.webContents.send('photo:event',value.event)
@@ -77,7 +83,11 @@ async function start(){
     if(method==='process')args.source=await permitted(args.source)
     if(method==='export'||method==='review')args.path=await permitted(args.path)
     if(['process','setup','prompt','export'].includes(method))busy=true
-    try{return await send(method,args)}finally{if(['process','setup','export'].includes(method))busy=false}
+    try{
+      const result=await send(method,args)
+      if(method==='session'&&result.source)await authorizePath(result.source)
+      return result
+    }catch(error){if(method==='prompt')busy=false;throw error}finally{if(['process','setup','export'].includes(method))busy=false}
   })
   ipcMain.handle('photo:pick',async(event,kind)=>{
     validateCaller(event)
@@ -87,11 +97,12 @@ async function start(){
     return Promise.all(result.filePaths.map(authorizePath))
   })
   ipcMain.handle('photo:drop',async(event,paths)=>{validateCaller(event);if(!Array.isArray(paths)||paths.length!==1)throw new Error('Drop one photo or folder');return Promise.all(paths.map(authorizePath))})
-  ipcMain.handle('photo:preview',async(event,path)=>{
+  ipcMain.handle('photo:preview',async(event,path,full=false)=>{
     validateCaller(event);const actual=await permitted(path)
+    if(typeof full!=='boolean')throw new Error('Invalid preview mode')
     if(!['.png','.jpg','.jpeg','.tif','.tiff'].includes(extname(actual).toLowerCase()))throw new Error('Preview appears after RAW/HEIF preparation')
     if((await fs.stat(actual)).size>512*1024*1024)throw new Error('Preview source exceeds 512 MiB')
-    if(['.tif','.tiff'].includes(extname(actual).toLowerCase()))return await send('preview',{path:actual})
+    if(full||['.tif','.tiff'].includes(extname(actual).toLowerCase()))return await send('preview',{path:actual,full})
     const img=nativeImage.createFromPath(actual)
     if(img.isEmpty())return await send('preview',{path:actual})
     return img.resize({width:Math.min(1600,img.getSize().width)}).toDataURL()

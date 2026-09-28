@@ -17,7 +17,7 @@ DEFAULTS = dict(exposure=0.0, warmth=0.0, tint=0.0, contrast=1.0,
 LIMITS = dict(exposure=(-3, 3), warmth=(-1, 1), tint=(-1, 1), contrast=(.5, 1.5),
               shadows=(-.3, .3), highlights=(-.3, .3), saturation=(0, 2),
               purple_saturation=(0, 2), denoise=(0, 1), noise_sigma=(1, 50))
-REGIONAL_FIELDS = {'selection', 'denoise_scope', 'inpaint', 'restore_faces'}
+REGIONAL_FIELDS = {'selection', 'denoise_scope', 'inpaint', 'restore_faces', 'focus'}
 
 def validate_recipe(value):
     if not isinstance(value, dict) or set(value) - set(DEFAULTS) - {'grade_mask', 'removal', 'denoise_model'} - REGIONAL_FIELDS:
@@ -34,6 +34,9 @@ def validate_recipe(value):
         raise ValueError('Denoise model must be drunet or scunet')
     if 'denoise_model' in value:
         result['denoise_model'] = model
+    if 'focus' in value:
+        from .focus import validate
+        result['focus'] = validate(value['focus'])
     if value.get('grade_mask'):
         result['grade_mask'] = str(local_path(value['grade_mask']))
     if value.get('removal') is not None:
@@ -242,6 +245,16 @@ def edit_layers(rgb, recipe, masks, folder):
             yield layer('SCUNet real PSNR denoise', scunet(current), denoise_mask, recipe['denoise'])
         else:
             yield layer('DRUNet denoise', drunet(current, recipe['noise_sigma']), denoise_mask, recipe['denoise'])
+    if recipe.get('focus', {}).get('strength', 0):
+        from .focus import correct, ITERATIONS
+        settings = recipe['focus']
+        focus_mask = selected('focus', current)
+        pixels = correct(current, settings['radius'])
+        json_write(folder/'focus-runtime.json', dict(method='damped Richardson-Lucy',
+            psf='Gaussian approximation', radius_sigma_pixels=settings['radius'],
+            iterations=ITERATIONS, processing='linear-light luminance, CPU float32',
+            limitation='Mild defocus only; wrong blur radius/noise can cause ringing. Lost detail is not guaranteed recoverable.'))
+        yield layer('Mild defocus correction - estimated Gaussian blur', pixels, focus_mask, settings['strength'])
     if 'removal' in recipe:
         r = recipe['removal']; mask = mask_pixels(masks['removal'][1], rgb.shape)
         if np.count_nonzero(mask) > mask.size * .25:

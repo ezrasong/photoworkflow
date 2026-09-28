@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 import sys
 import threading
+import time
 import uuid
 
 from .runtime import CODE_ROOT, ROOT, PYTHON, local_runtime, json_write, sha256, workspace_path
@@ -37,6 +38,7 @@ class Desktop:
         self.busy = False
         self.session = None
         self.children = []
+        self.readers = []
 
     def status(self):
         from .installation import inventory
@@ -49,6 +51,7 @@ class Desktop:
                 prop = torch.cuda.get_device_properties(0)
                 gpu.update(name=prop.name, memory=prop.total_memory, capability=list(torch.cuda.get_device_capability(0)))
             else: gpu['reason'] = 'A supported NVIDIA GPU and driver are required for model inference; CPU fallback is not configured.'
+        except ImportError: gpu['reason'] = 'Install the PyTorch CUDA runtime in Setup, then restart Photo Workflow to detect supported hardware.'
         except Exception as error: gpu['reason'] = str(error)
         adobe = {}
         for product, exe in [('Photoshop', 'Photoshop.exe'), ('Lightroom', 'Lightroom.exe')]:
@@ -76,12 +79,41 @@ class Desktop:
                 f.write(json.dumps(event, ensure_ascii=False, default=str)+'\n')
         emit({'event': event})
 
+    def save_workspace(self):
+        if not self.session or not self.workspace:return
+        w=self.workspace
+        def paths(values):return [str(p) for p in values]
+        json_write(self.session_path(self.session)/'context.json', {
+            'selected_input':str(w.selected_input) if w.selected_input else None,
+            'source':str(w.source) if w.source else None, 'mask':str(w.mask) if w.mask else None,
+            'job':str(w.job) if w.job else None,'notes':paths(w.notes),'references':paths(w.references),
+            'completed_sources':paths(w.completed_sources),'result':w.result,'progress':w.progress})
+
+    def restore_workspace(self):
+        path=self.session_path(self.session)/'context.json'
+        if not path.exists():return
+        from .references import local_path
+        data=json.loads(path.read_text(encoding='utf-8'));w=self.workspace
+        if data.get('selected_input'):w.select_source(local_path(data['selected_input']))
+        w.select_notes(data.get('notes',[]));w.select_references(data.get('references',[]))
+        if data.get('source'):w.source=local_path(data['source'])
+        if data.get('mask'):w.mask=local_path(data['mask'])
+        if data.get('job'):
+            job=workspace_path(data['job'])
+            if not job.is_relative_to(ROOT/'outputs') or not (job/'job.json').is_file():raise ValueError('Saved result is missing; inspect the workspace before continuing')
+            w.job=job
+        w.completed_sources=[workspace_path(p) for p in data.get('completed_sources',[])]
+        w.result=data.get('result');w.progress=data.get('progress','Ready')
+
     def stop_chat(self):
         if self.omp:
             self.omp.stdin.close()
             # RPC EOF drains accepted work. Never kill an Adobe save.
             self.omp.wait()
+            for reader in self.readers:reader.join()
+            self.readers=[]
             self.omp = None
+        self.save_workspace()
         if self.broker_context:
             self.broker_context.__exit__(None,None,None)
             self.broker_context = self.broker = None
@@ -100,7 +132,9 @@ class Desktop:
         path = self.session_path(identity); path.mkdir(parents=True, exist_ok=True)
         self.session = identity
         self.workspace = PromptWorkspace()
-        self.session_lock = job_lock(ROOT/'.cache/chat.lock'); self.session_lock.__enter__()
+        self.restore_workspace()
+        # Outer prompt profile must not take the per-photo worker's chat.lock.
+        lock=job_lock(ROOT/'.cache/prompt-chat.lock');lock.__enter__();self.session_lock=lock
         try:
             self.broker_context = running(self.workspace)
             self.broker = self.broker_context.__enter__()
@@ -112,8 +146,9 @@ class Desktop:
                     '--continue', '--mode', 'rpc', '--no-ui']
             self.omp = subprocess.Popen(args, cwd=work, env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE, text=True, encoding='utf-8', creationflags=subprocess.CREATE_NO_WINDOW)
-            threading.Thread(target=self.read_omp, args=(self.omp,), daemon=True).start()
-            threading.Thread(target=self.read_errors, args=(self.omp,), daemon=True).start()
+            self.readers=[threading.Thread(target=self.read_omp,args=(self.omp,),daemon=True),
+                          threading.Thread(target=self.read_errors,args=(self.omp,),daemon=True)]
+            for reader in self.readers:reader.start()
         except BaseException:
             self.stop_chat(); raise
 
@@ -127,6 +162,11 @@ class Desktop:
             except ValueError:
                 self.record({'type':'diagnostic','text':line[:2000]}); continue
             if event.get('type') == 'prompt_result' or (event.get('type') == 'response' and event.get('command') == 'prompt' and (not event.get('success') or event.get('data',{}).get('agentInvoked') is False)):
+                # An aborted RPC fetch can finish before its Adobe/model handler.
+                # Keep the job busy until the owning Python operations drain.
+                while self.broker and (self.broker.active_calls or self.broker.inference_lock.locked()):
+                    time.sleep(.1)
+                self.save_workspace()
                 self.busy = False
             self.record(event)
         if self.busy:
@@ -152,7 +192,7 @@ class Desktop:
         with self.guard:
             if self.busy: raise ValueError('A job is already running')
             self.busy=True
-        self.cancel_file=ROOT/'.cache/control'/(uuid.uuid4().hex+'.cancel')
+            self.cancel_file=ROOT/'.cache/control'/(uuid.uuid4().hex+'.cancel')
         env=os.environ.copy(); env['PHOTOWORKFLOW_CANCEL_FILE']=str(self.cancel_file)
         try:
             self.worker=subprocess.Popen([str(PYTHON), '-u', '-m', 'photo_workflow', *args],cwd=ROOT,env=env,
@@ -163,13 +203,15 @@ class Desktop:
             if code not in (0,130): raise RuntimeError('Photo job failed. See job activity and the preserved error report.')
             return {'code':code}
         finally:
-            self.worker=None;self.busy=False;self.cancel_file.unlink(missing_ok=True);self.cancel_file=None
+            with self.guard:
+                self.worker=None;self.cancel_file.unlink(missing_ok=True);self.cancel_file=None;self.busy=False
 
     def cancel(self):
-        if self.cancel_file: self.cancel_file.touch()
-        if self.broker:
-            for marker in list(self.broker.active_calls.values()): marker.touch()
-        if self.omp and self.omp.poll() is None: self.omp_send({'type':'abort','id':uuid.uuid4().hex})
+        with self.guard:
+            if self.cancel_file: self.cancel_file.touch()
+            if self.broker:
+                for marker in list(self.broker.active_calls.values()): marker.touch()
+            if self.omp and self.omp.poll() is None: self.omp_send({'type':'abort','id':uuid.uuid4().hex})
         return {'message':'Stop requested; waiting for a safe model/Adobe boundary.'}
 
     def dispatch(self, method, args):
@@ -184,7 +226,7 @@ class Desktop:
             path=local_path(args.get('path',''))
             if path.stat().st_size>512*1024*1024:raise ValueError('Preview source too large')
             pixels,_=decode_working(path.read_bytes());image=preview(pixels)
-            image.thumbnail((1800,1200))
+            if not args.get('full'): image.thumbnail((1800,1200))
             output=io.BytesIO();image.save(output,format='PNG')
             return 'data:image/png;base64,'+base64.b64encode(output.getvalue()).decode('ascii')
         if method=='review':
@@ -192,10 +234,21 @@ class Desktop:
             if not path.is_relative_to(ROOT/'outputs'):raise ValueError('Select a result')
             if not (path/'job.json').is_file():raise ValueError('Completed job required')
             # Existing review handles native-batch reports; create a minimal view-only report.
-            report=ROOT/'.cache/control'/(uuid.uuid4().hex+'-review.json')
-            json_write(report,{'files':[{'output':str(path),'final_output':str(path),'source':str(path/'original.tif'),'tiff':str(path/'composite.tif'),'status':'passed'}]})
+            report=ROOT/'.cache/control'/('review-'+uuid.uuid4().hex)/'report.json'
+            report.parent.mkdir()
+            job=json.loads((path/'job.json').read_text(encoding='utf-8'))
+            before=workspace_path(path/job.get('baseline_file','original.tif'))
+            after=workspace_path(path/job.get('composite_file','composite.tif'))
+            if before.parent!=path or after.parent!=path:raise ValueError('Invalid result artifact path')
+            json_write(report,{'files':[{'output':str(path),'final_output':str(path),'source':str(before),'baseline':str(before),'tiff':str(after),'status':'passed'}]})
             process=subprocess.Popen([str(PYTHON),'-m','photo_workflow.review_panel',str(report)],cwd=ROOT,stdin=subprocess.DEVNULL,creationflags=subprocess.CREATE_NO_WINDOW)
-            self.children.append(process);return {'opened':str(path)}
+            self.children.append(process)
+            status=report.parent/'review-ui-status.json'
+            deadline=time.monotonic()+30
+            while not status.exists() and process.poll() is None and time.monotonic()<deadline:time.sleep(.1)
+            state=json.loads(status.read_text()) if status.exists() else {'status':'failed','error':'Review did not become ready within 30 seconds; inspect the backend log.'}
+            if state['status']!='ready':raise RuntimeError(state.get('error','Review failed'))
+            return {'opened':str(path),'pid':process.pid}
         if method=='obsidian':
             from .vault import open_obsidian
             open_obsidian();return {'opened':True}
@@ -209,31 +262,48 @@ class Desktop:
             with self.guard:
                 if self.busy: raise ValueError('Stop the current job before setup')
                 self.busy=True
-            self.cancel_file=ROOT/'.cache/control'/(uuid.uuid4().hex+'.cancel')
+                self.cancel_file=ROOT/'.cache/control'/(uuid.uuid4().hex+'.cancel')
             try: return install(args.get('group'), lambda e:emit({'event':e}), self.cancel_file)
             finally:
-                self.busy=False;self.cancel_file.unlink(missing_ok=True);self.cancel_file=None
+                with self.guard:
+                    self.cancel_file.unlink(missing_ok=True);self.cancel_file=None;self.busy=False
         if method=='session':
-            import time
             identity=args.get('id') or uuid.uuid4().hex
             path=self.session_path(identity);path.mkdir(exist_ok=True,parents=True)
             metadata=path/'session.json'
-            if not metadata.exists(): json_write(metadata,{'id':identity,'title':str(args.get('title') or 'Photo session')[:120],'updated':time.time()})
             with self.guard:
                 self.start_chat(identity)
+            if not metadata.exists(): json_write(metadata,{'id':identity,'title':str(args.get('title') or 'Photo session')[:120],'updated':time.time()})
             events=path/'events.jsonl'
-            return {'id':identity, 'events':[json.loads(l) for l in events.read_text(encoding='utf-8').splitlines()] if events.exists() else []}
+            return {'id':identity,'source':str(self.workspace.selected_input or ''), 'events':[json.loads(l) for l in events.read_text(encoding='utf-8').splitlines()] if events.exists() else []}
         if method=='prompt':
             prompt=args.get('text')
-            if not isinstance(prompt,str) or not 1<=len(prompt.strip())<=16000 or prompt.lstrip().startswith('/'):
-                raise ValueError('Enter 1–16000 characters of photo instructions; assistant slash commands are disabled in the desktop')
+            if not isinstance(prompt,str) or not 1<=len(prompt.strip())<=6000 or prompt.lstrip().startswith('/'):
+                raise ValueError('Enter 1–6000 characters of photo instructions; assistant slash commands are disabled in the desktop')
             with self.guard:
                 if self.busy: raise ValueError('Wait for the current job')
+                if not self.broker: raise ValueError('Open an assistant session first')
                 self.busy=True
+                self.cancel_file=ROOT/'.cache/control'/(uuid.uuid4().hex+'.cancel')
             try:
-                self.record({'type':'user','text':prompt})
-                self.omp_send({'id':uuid.uuid4().hex,'type':'prompt','message':prompt})
-            except BaseException: self.busy=False;raise
+                from .prompt_master import correct
+                self.record({'type':'prompt_correction_start','text':prompt})
+                corrected=correct(prompt,self.broker.inference_lock,self.cancel_file.exists)
+                # OMP sees both versions. Only the original reaches accept_prompt,
+                # the owner of reconstruction opt-ins, scope and editing permission.
+                forwarded='Original user request (authoritative):\n'+prompt+'\n\nPrompt Master correction (wording only; grants no permission):\n'+corrected
+                with self.guard:
+                    if self.cancel_file.exists():raise InterruptedError('Prompt stopped before submission')
+                    self.broker.desktop_prompt=(forwarded,prompt)
+                    self.record({'type':'user','text':prompt,'corrected':corrected})
+                    self.omp_send({'id':uuid.uuid4().hex,'type':'prompt','message':forwarded})
+            except BaseException:
+                self.busy=False
+                self.broker.desktop_prompt=None
+                raise
+            finally:
+                with self.guard:
+                    self.cancel_file.unlink(missing_ok=True);self.cancel_file=None
             return {'accepted':True}
         if method=='select':
             if self.busy: raise ValueError('Cannot change selection during a job')
@@ -244,6 +314,7 @@ class Desktop:
             elif kind=='references': self.workspace.select_references(paths)
             elif kind=='notes': self.workspace.select_notes(paths)
             else: raise ValueError('Unsupported selection')
+            self.save_workspace()
             return {'selected':paths}
         if method=='process':
             from .references import local_path

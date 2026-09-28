@@ -4,7 +4,32 @@ The renderer is sandboxed with Node integration off, context isolation on and
 a restrictive CSP. The main process validates caller frames and an action
 allowlist. Pickers/drop grant local-file access; preview/reveal paths must be
 selected or within the workspace. External navigation, webviews and permissions
-are denied. Model/tool text is never executed as HTML.
+are denied for the privileged renderer. Model/tool text is never executed as HTML.
+The reference browser is an isolated WebContentsView, without Node, preload or
+photo IPC, using a separate memory-only session. It permits public HTTP(S) reads
+on standard ports; local/private addresses, non-read requests, downloads and
+permission requests are denied. It is intended for reference browsing, not logins,
+file uploads or authenticated web applications. Browsing does not add page content
+to the assistant automatically.
+
+Prompt Master makes one local, tool-free correction request before every desktop
+conversation submission. Both versions are recorded. The broker binds that exact
+forwarded submission to the original text before accept_prompt, so rewritten text
+cannot authorize reconstruction, path selection or expanded scope. Invalid or
+cancelled corrections send no editing request; the composer retains the original.
+The existing advanced native panel's legacy assistant is a separate workflow.
+
+Before/after review decodes through the existing color-managed backend, displays
+8-bit sRGB PNGs in fit or native-pixel mode, and preserves full-precision TIFFs.
+The existing image-size/decoder limits and 512 MiB preview source limit apply.
+
+Soft-focus correction uses 12 damped Richardson–Lucy iterations with an estimated
+Gaussian point-spread function in linear-light luminance. OpenCV/NumPy are already
+bundled; no model or network download is required. Tiled processing includes the
+full iterative halo, checks cancellation, preserves uint16 output, and reuses the
+existing mask/layer/opacity pipeline. Radius is Gaussian sigma in source pixels
+(0.4–3), strength is 0–0.75. It is intended for mild defocus; noise, an incorrect
+radius or severe blur can leave artifacts. It does not infer missing faces.
 
 Python is an owned child over private stdio. OMP retains its authenticated
 loopback broker, bounded photo tools, isolated profile, GPU locks, opt-in checks,

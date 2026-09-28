@@ -179,7 +179,7 @@ class PromptWorkspace(Workspace):
         try:
             process = subprocess.Popen([sys.executable, '-m', 'photo_workflow.native_batch',
                 str(path), '--prompt', self.prompt, '--unified', '--context', str(context_path)], cwd=ROOT, env=env,
-                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8',
+                stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding='utf-8',
                 errors='replace', creationflags=subprocess.CREATE_NO_WINDOW)
         except Exception as error:
             context_path.unlink(missing_ok=True)

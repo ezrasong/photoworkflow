@@ -30,6 +30,7 @@ export default function(pi) {
     contrast:range(.5,1.5), shadows:range(-.3,.3), highlights:range(-.3,.3), saturation:range(0,2),
     purple_saturation:range(0,2), denoise:z.number().min(0).max(1), noise_sigma:range(1,50),
     denoise_model:z.enum(['scunet','drunet']).optional(), denoise_scope:z.enum(['whole_image','selection']),
+    focus:z.object({radius:z.number().min(.4).max(3),strength:z.number().min(0).max(.75)}).optional(),
     ...(reconstruction.has('inpaint') ? {inpaint:z.object({target:target.optional(),use_user_mask:z.boolean().optional(),expand:z.number().int().min(0).max(32).optional(),feather:z.number().int().min(0).max(64).optional()}).optional()} : {}),
     ...(reconstruction.has('restore_faces') ? {restore_faces:z.object({position,strength:z.number().min(0).max(.5)}).optional()} : {})
   };

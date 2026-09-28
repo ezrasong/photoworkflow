@@ -1,0 +1,15 @@
+const {_electron:electron}=require('playwright');const fs=require('node:fs/promises');const {join,resolve}=require('node:path');const {execFileSync}=require('node:child_process');const {createHash}=require('node:crypto');const assert=require('node:assert/strict');
+const root=resolve(__dirname,'../..'),exe=join(root,'.cache/install-acceptance/Photo Workflow.exe'),report=join(root,'.cache/desktop-installer-report.json');
+const hash=async p=>createHash('sha256').update(await fs.readFile(p)).digest('hex');
+(async()=>{const env={...process.env};delete env.ELECTRON_RUN_AS_NODE;delete env.PHOTOWORKFLOW_HOME;const app=await electron.launch({executablePath:exe,env});try{const page=await app.firstWindow();await page.waitForFunction(()=>window.photo);const status=await page.evaluate(()=>window.photo.call('status'));const version=await app.evaluate(({app})=>app.getVersion());
+if(process.argv[2]==='prepare'){
+ assert.equal(version,'0.1.0');const fixture=join(status.home,'inputs','installer-synthetic-'+Date.now()+'.png');
+ execFileSync(join(exe,'../resources/backend/python/python.exe'),['-c',`from PIL import Image; Image.new('RGB',(48,32),(75,100,120)).save(${JSON.stringify(fixture)})`],{windowsHide:true});
+ console.log('Installed workspace',status.home);await app.evaluate(({dialog},fixture)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[fixture]})},fixture);await page.evaluate(()=>window.photo.pick('photo'));await page.evaluate(source=>window.photo.call('process',{source,operation:'edit',recipe:{exposure:.2,denoise:0}}),fixture);
+ const jobs=await page.evaluate(()=>window.photo.call('results'));const output=join(jobs[0].path,'composite.tif');
+ const note=join(status.home,'desktop','installer-note-'+Date.now()+'.txt');await fs.writeFile(note,'Installer preservation acceptance sentinel.');
+ const paths=[fixture,output,note,join(status.home,'desktop/settings.json')];await page.evaluate(()=>window.photo.call('settings',{value:{theme:'light',reviewZoom:'fit'}}));
+ await fs.writeFile(report,JSON.stringify({status:'prepared',home:status.home,previousVersion:version,files:await Promise.all(paths.map(async path=>({path,sha256:await hash(path)}))),checks:['NSIS 0.1.0 installs to chosen path and launches with bundled Python','Installed app creates a synthetic 16-bit output in the default AppData workspace']},null,2));
+}else{assert.equal(version,'0.1.1');const evidence=JSON.parse(await fs.readFile(report,'utf8'));assert.equal(status.home,evidence.home);for(const file of evidence.files)assert.equal(await hash(file.path),file.sha256);evidence.version=version;evidence.status='upgrade-passed';evidence.checks.push('NSIS 0.1.0 → 0.1.1 upgrade preserves original, TIFF output, note and settings byte-for-byte');await fs.writeFile(report,JSON.stringify(evidence,null,2));}
+console.log('Installed app '+process.argv[2]+' passed');
+}finally{await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].close());if(app.process().exitCode===null)await new Promise(r=>app.process().once('exit',r));}})().catch(e=>{console.error(e);process.exitCode=1})

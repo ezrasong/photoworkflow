@@ -1,6 +1,6 @@
 {
   "name": "photo-workflow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Local photo editing with Oh My Pi",
   "author": "Photo Workflow contributors",
@@ -16,6 +16,7 @@
     "electron-window-state": "5.0.3"
   },
   "devDependencies": {
+    "@kobalte/core": "0.13.11",
     "@types/node": "22.19.15",
     "electron": "42.11.8",
     "electron-builder": "26.15.2",
@@ -52,7 +53,8 @@
       "target": [
         "nsis"
       ],
-      "signAndEditExecutable": true
+      "signAndEditExecutable": true,
+      "icon": "resources/icon.ico"
     },
     "nsis": {
       "oneClick": false,
