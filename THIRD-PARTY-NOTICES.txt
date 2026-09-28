@@ -27,3 +27,15 @@ compute capability 12.0. The source license accompanies packaging/seed/licenses.
 Obsidian is optional, separately licensed, and downloaded only through explicit
 setup from its official signed release. Photoshop and Lightroom are not bundled.
 No rights to users' photographs, notes or Adobe software are granted by this app.
+
+Bundled community MCP servers (unofficial, not Adobe/Blackmagic products):
+- alisaitteke/photoshop-mcp 1.7.24, MIT (Ali Sait Teke).
+- Automaat/lightroom-mcp 0.17.0, MIT (Marcin Skalski).
+- samuelgursky/davinci-resolve-mcp 4.8.22, MIT (see upstream LICENSE).
+Exact commits, download hashes and provenance: packaging/creative-mcp.json.
+Each payload retains its LICENSE. Photoshop's dependency notices remain in
+node_modules; isolated Python distributions retain dist-info/licenses.
+Node.js 22.23.3 includes its LICENSE with third-party attributions. The MCP
+Python SDK and pyaaf2 are MIT; transitive licenses ship in their distributions.
+Resolve's eager log-directory default is adapted to Photo Studio's writable
+profile. No Adobe or DaVinci Resolve application/license is redistributed.

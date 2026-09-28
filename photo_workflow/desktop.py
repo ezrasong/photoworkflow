@@ -39,9 +39,12 @@ class Desktop:
         self.session = None
         self.children = []
         self.readers = []
+        from .creative_mcp import write_config
+        self.mcp_config = write_config()
 
     def status(self):
         from .installation import inventory
+        from .creative_mcp import inventory as mcp_inventory
         import shutil
         gpu = {'available': False, 'reason': 'CUDA inspection failed'}
         try:
@@ -58,6 +61,8 @@ class Desktop:
             base = Path(os.environ.get('ProgramFiles', 'C:/Program Files'))/'Adobe'
             adobe[product] = [str(p) for p in base.glob('*/'+exe)] if base.exists() else []
         return dict(home=str(ROOT), gpu=gpu, adobe=adobe, dependencies=inventory(),
+                    creativeMcp=mcp_inventory(), mcpConfig=self.mcp_config,
+                    mcpPlugin=str(ROOT/'apps/LightroomMCP.lrplugin'),
                     free=shutil.disk_usage(ROOT).free, busy=self.busy,
                     plugin=str(ROOT/'apps/PhotoWorkflow.lrplugin'), sessions=self.sessions(), results=self.results())
 
@@ -217,6 +222,19 @@ class Desktop:
     def dispatch(self, method, args):
         if not isinstance(args,dict): raise ValueError('Object arguments required')
         if method=='status': return self.status()
+        if method=='mcp_check':
+            from .creative_mcp import inspect
+            if set(args) != {'server', 'probe'} or type(args['probe']) is not bool:
+                raise ValueError('Choose a bundled server and check type')
+            with self.guard:
+                if self.busy: raise ValueError('Wait for the current job before checking MCP')
+                self.busy=True
+                self.cancel_file=ROOT/'.cache/control'/(uuid.uuid4().hex+'.cancel')
+            try:
+                return inspect(args['server'], probe=args['probe'], cancel_file=self.cancel_file)
+            finally:
+                with self.guard:
+                    self.cancel_file.unlink(missing_ok=True);self.cancel_file=None;self.busy=False
         if method=='results': return self.results()
         if method=='preview':
             import base64

@@ -14,7 +14,8 @@ async function fixture(){
  events:cb=>{listener=cb;return()=>{}},pick:async()=>[source],drop:async()=>[source],preview:async()=>preview,reveal:async()=>true,
  browser:async(action,args)=>{if(action==='bounds'&&(!Object.values(args).every(Number.isFinite)||args.x<0||args.y<0))throw Error('Invalid fixture bounds');return true},
  call:async(method,args={})=>{
- if(method==='status')return {home:'C:/Synthetic/'+long,plugin:'C:/Synthetic/'+long+'/plugin',free:400*1024**3,gpu:{name:long,memory:32*1024**3,capability:[12,0]},adobe:{},dependencies:['runtime','assistant','photo','legacy','obsidian'].map(group=>({group,bytes:8*1024**3,missingBytes:8*1024**3})),sessions:Array.from({length:24},(_,i)=>({id:''+i,title:long+' '+i,updated:1})),results};
+ if(method==='status')return {home:'C:/Synthetic/'+long,plugin:'C:/Synthetic/'+long+'/plugin',free:400*1024**3,gpu:{name:long,memory:32*1024**3,capability:[12,0]},adobe:{},creativeMcp:['photoshop','lightroom','resolve'].map(id=>({id,name:id,version:'1.0.0',bundled:true})),mcpConfig:'C:/Synthetic/config.json',mcpPlugin:'C:/Synthetic/LightroomMCP.lrplugin',dependencies:['runtime','assistant','photo','legacy','obsidian'].map(group=>({group,bytes:8*1024**3,missingBytes:8*1024**3})),sessions:Array.from({length:24},(_,i)=>({id:''+i,title:long+' '+i,updated:1})),results};
+ if(method==='mcp_check')return {serverReady:true,toolCount:37,hostChecked:!args.probe,inspection:args.probe?null:{isError:true,content:[{type:'text',text:'Application not connected. '+long}]}};
  if(method==='settings')return {theme:'dark',reviewZoom:'fit'};
  if(method==='session')return {id:'0',source,events:[{type:'user',text:long.repeat(5),corrected:long.repeat(6)},{type:'message_update',assistantMessageEvent:{type:'text_delta',delta:long.repeat(12)}}]};
  if(method==='setup'){listener({type:'setup_progress',file:source,done:1,total:100});return {restartRecommended:true}};
@@ -47,6 +48,8 @@ async function details(page){const button=page.getByRole('button',{name:'Control
   await settle(page);console.log('Checking',label);await page.reload();await page.getByRole('button',{name:'Install / repair complete setup',exact:true}).waitFor();await settle(page)
   const effective=await page.evaluate(()=>[innerWidth,innerHeight]);assert.ok(Math.abs(effective[0]-width/scale)<=2&&Math.abs(effective[1]-height/scale)<=2,label+' effective viewport '+effective);await noOverflow(page,label+' setup');await reachable(page.getByRole('button',{name:'Install / repair complete setup',exact:true}));
   await reachable(page.getByRole('button',{name:'Show workspace',exact:true}));
+  await reachable(page.getByRole('button',{name:'Inspect app',exact:true}).last());await page.getByRole('button',{name:'Inspect app',exact:true}).last().click();await page.getByText('App needs attention',{exact:false}).waitFor();await reachable(page.getByRole('button',{name:'Show MCP configuration',exact:true}));await noOverflow(page,label+' MCP results');
+  if(scale===1)await page.screenshot({path:path.join(out,label+'-mcp.png')});
   await studio(page)
   await page.getByRole('button',{name:'Choose photo',exact:true}).click()
   if(!await page.getByRole('button',{name:'＋ New session',exact:true}).isVisible())await page.getByRole('button',{name:'Toggle navigation',exact:true}).click()

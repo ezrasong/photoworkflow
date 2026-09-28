@@ -196,3 +196,34 @@ and .cache/desktop-browser-report.json. Installer evidence is in
 - Advanced masking/batch/legacy assistant controls still use native panels.
   Prompt Master applies to desktop conversation submissions, not the legacy panel.
 - Video remains future work.
+
+
+## Bundled creative MCP verification — 0.1.5
+
+- Real initialize/tools-list handshakes passed using the shipped Python and a
+  stripped PATH: Photoshop 1.7.24 (125 tools), Lightroom 0.17.0 (18), Resolve
+  4.8.22 (37). Reports: `.cache/creative-mcp-verification.json`.
+- Six new boundary tests cover archive traversal/links, relocatable config,
+  credential/hook isolation, invalid app names and cancellation of a running
+  inspection. All 14 focused setup/prompt/MCP tests passed; 13 bundled-runtime
+  MCP/export precision tests passed.
+- All 27 responsive layout cases passed, including MCP results and actions,
+  small windows, display scaling and enlarged text. Packaged smoke tests passed
+  with no models or developer tools: photo edits, review, cancellation, preserved
+  originals and settings across restart. Reports remain under `.cache`.
+- Native computer-use inspection confirmed the new Setup cards and a successful
+  Photoshop server check showing 125 tools. Native resize gestures did not change
+  the window in this session; the 27 automated resize checks provide that proof.
+- Packaged payload verification checked 27,100 source files: the only omitted
+  entries were two empty `.gitkeep` placeholders filtered by electron-builder.
+- Host limits: Lightroom correctly reports its MCP plug-in is not connected.
+  Photoshop requires an already-running application and document; its initial
+  connection test exposed upstream automatic launching, so the inspector now
+  checks running state before detection. Live document inspection is unverified.
+  Resolve 20.3.2.9 is installed and was opened to Project Manager without opening
+  or editing projects; a live version query timed out. Runtime-state inspection
+  works, but successful live Resolve editing/export is not claimed.
+- Built `PhotoStudio-0.1.5-x64-Setup.exe` (472,718,394 bytes), unsigned. SHA-256:
+  `05229545d9cc17c857603860982b39567376cb4dd51fae529d00ab51ff783b94`.
+  This build was tested from its unpacked payload; NSIS installation was not
+  rerun, preserving the user's uninstalled state for a clean reinstall.

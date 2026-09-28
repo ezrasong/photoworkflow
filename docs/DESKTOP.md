@@ -130,26 +130,69 @@ the server ignores Range. Hash failure removes only the invalid partial. Disk
 space is checked before downloading. Inference also verifies model hashes.
 After failed mutation inspect preserved evidence before starting a new job.
 
-## Adobe MCP assessment (September 28, 2026)
+## Creative MCP selection (September 28, 2026)
 
-Keep the tested photo bridges until a specific MCP integration demonstrates an
-improvement. Source review found these candidates; none was installed or enabled:
+GitHub repository searches for Photoshop MCP, Lightroom MCP and DaVinci Resolve
+MCP were sorted by stars. Stars are a popularity signal, not a correctness score.
+README/source review also checked maintenance, Windows support, licensing,
+packaging and mutation behavior. These are the strongest direct candidates found:
 
-| Candidate | Reviewed commit | Compatibility finding |
-| --- | --- | --- |
-| [Photoshop MCP](https://github.com/alisaitteke/photoshop-mcp) | `25d914a6b637230e77410479d0b8f1f715c14c49` | Windows still uses an Adobe script bridge; additional tools and optional UXP support need host testing. |
-| [Lightroom MCP](https://github.com/Automaat/lightroom-mcp) | `5af7a87824f8ff34587b870fc43b04e5fda127b5` | Its `setDevelopSettings` edits the referenced photo directly. Photo Studio creates a virtual copy; an adapter must retain that invariant. Catalog/preset tools may add useful capabilities. |
-| [Premiere MCP](https://github.com/leancoderkavy/premiere-pro-mcp) | `f610059a765c9cfc659b818c8c23b7c4995af978` | CEP/UXP timeline/export tools require live capability verification. Premiere was not found beside the installed Adobe applications; no host test was performed. |
+| App / repository | Stars | Finding and decision |
+| --- | ---: | --- |
+| [alisaitteke/photoshop-mcp](https://github.com/alisaitteke/photoshop-mcp) | 531 | Selected: active, MIT, Windows script bridge, packaged dependencies, broad tools. Telemetry disabled by Photo Studio. |
+| [loonghao/photoshop-python-api-mcp-server](https://github.com/loonghao/photoshop-python-api-mcp-server) | 306 | Credible Windows COM alternative; Python fits our stack, but narrower advertised tools and lower adoption. |
+| [Automaat/lightroom-mcp](https://github.com/Automaat/lightroom-mcp) | 108 | Selected: active, MIT, standalone Windows executable and authenticated local plug-in bridge. |
+| [noopz/lightroom_mcp](https://github.com/noopz/lightroom_mcp) | 15 | Apache-2.0 Python/Lua alternative with many Develop controls; last push December 2025 and more manual installation. |
+| [samuelgursky/davinci-resolve-mcp](https://github.com/samuelgursky/davinci-resolve-mcp) | 3,211 | Selected: active, MIT, 37 compound tools, documented Windows support, guarded operations and optional in-app bridge. |
+| [barckley75/resolve-claude-mcp](https://github.com/barckley75/resolve-claude-mcp) | 369 | Closest popular alternative; README says tested only on macOS, Windows unverified, some tools macOS-only. |
+| [hiteshK03/davinci-resolve-mcp](https://github.com/hiteshK03/davinci-resolve-mcp) | 100 | In-app bridge alternative; lower adoption and older activity than the selected Resolve project. |
 
-Oh My Pi already supports MCP. Enabling discovery alone is insufficient: the
-photo extension binds original user authorization, restricts active tools and
-propagates progress/cancellation; the broker also validates tool names. Preserve
-those boundaries when admitting namespaced MCP tools. For a concrete missing
-operation, pin the server/connector, verify state reads, then compare synthetic
-edits and exports. Require original/document preservation, correct color/output,
-and safe timeout/disconnect/cancellation without duplicate mutations. A failed
-edit must never be automatically replayed through a different bridge. MCP itself
-does not increase pixel quality. The current clean-reinstall state remains intact.
+The user's example repositories were not treated as fixed choices. They emerged
+as the best fits in this comparison. Pins: Photoshop **1.7.24**, Lightroom
+**0.17.0**, Resolve **4.8.22**, Node **22.23.3**. Exact commits, SHA-256 hashes
+and sizes live in `packaging/creative-mcp.json`. `build_creative_mcp.py` validates
+archives and bundles servers plus an isolated, hash-locked Python dependency
+set; NSIS includes the complete payload. No runtime npm, pip, uv, compiler or
+system Node/Python is needed. Updating pins is an explicit build change.
+
+### Setup and usable scope
+
+- **Settings → Creative app connections → Check server** performs a real MCP
+  initialize/tools-list exchange. Server readiness does not certify the creative
+  application is connected. **Inspect app** returns a bounded state read and
+  preserves upstream errors. These checks do not download models.
+- Photoshop must already be open with a document for document inspection.
+  Lightroom Classic needs the bundled `apps/LightroomMCP.lrplugin` added in
+  Plug-in Manager, followed by its **Start Server** control. Its token stays at
+  the plug-in's standard local user path. Keep the separate `PhotoWorkflow`
+  plug-in enabled for existing virtual-copy editing.
+- DaVinci Resolve is the video direction, replacing the earlier Premiere plan.
+  Studio supports external scripting with **Preferences → General → External
+  scripting using: Local**. Free-edition compatibility depends on version and
+  the upstream in-app bridge; that bridge is not silently installed. Photo
+  Studio's current Resolve inspection reports running state, not a live project
+  scripting connection. Optional FFmpeg, transcription and analysis models are
+  not bundled, and dependent upstream operations may report them missing.
+- The local assistant exposes only `creative_app_status` through its existing
+  authenticated broker. It accepts a fixed app enum, never arbitrary tool names,
+  executable paths, scripts or model-supplied MCP arguments. Existing photo
+  edits/export tests and original/virtual-copy safeguards remain authoritative.
+- **Show MCP configuration** reveals an app-owned `desktop/mcp/servers.json`,
+  regenerated with installed absolute paths on startup. It is optional for other
+  MCP clients and exposes full upstream tools, including mutations. Those tools
+  have upstream semantics, not Photo Studio's virtual-copy/export guarantees.
+  No external assistant configuration is changed automatically.
+- Child runtimes use private writable profiles, a restricted environment,
+  disabled Photoshop analytics/feedback and disabled Resolve update checks.
+  Only Resolve's eager log-directory default is patched to the writable profile;
+  its dependency versions are isolated from the photo pipeline. Inspection
+  cancellation stops the owned server processes; mutation calls are never routed
+  through this timeout/cancellation path or retried through another bridge.
+
+MCP standardizes access and expands the available application commands; it does
+not improve pixel quality by itself. Integrated Resolve timelines, video export
+and broader assistant editing tools remain future work. No live Resolve editing
+has been verified on this computer.
 
 ## Future video boundary
 

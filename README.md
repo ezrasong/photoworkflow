@@ -11,6 +11,8 @@ Install and launch **Photo Studio** from its shortcut; developer tools are not
 required. First launch opens setup when downloads are missing. Choose
 **Install / repair complete setup** for all models, runtimes, Oh My Pi, Obsidian
 and Photo Vault (about 35 GiB of downloads). Individual components can be repaired.
+The installer itself includes Photoshop, Lightroom Classic and DaVinci Resolve
+MCP servers with private Node/Python dependencies; they need no npm/pip setup.
 Downloads show sizes, check disk space, resume interruption and verify SHA-256.
 Complete setup installs dependencies in order. Restart when setup finishes.
 
@@ -91,9 +93,21 @@ unsigned, regardless of generic signing messages in the packaging log.
 **Current integration:** the desktop talks to Python through private stdio IPC.
 Python controls Oh My Pi through its RPC interface, and an explicitly loaded
 extension calls a restricted, authenticated local photo-tool broker. Obsidian
-opens a dedicated local Markdown vault. These connections do not currently use
-MCP (Model Context Protocol); project-provided MCP configuration is disabled in
-the isolated assistant profile.
+opens a dedicated local Markdown vault. The desktop also connects to three bundled MCP (Model Context Protocol) servers
+through a bounded inspection tool and Setup connection checks. Photo edits still
+use the tested Python bridges. Project-provided MCP configuration stays disabled
+in the isolated assistant profile. **Settings → Creative app connections** shows
+versions, checks servers, inspects app state, and reveals the Lightroom MCP
+plug-in and optional configuration for other MCP clients. DaVinci Resolve is the
+chosen video editor; integrated video editing/export remains planned.
+
+After comparing alternatives, the selected servers are
+[alisaitteke/photoshop-mcp](https://github.com/alisaitteke/photoshop-mcp) (531 stars),
+[Automaat/lightroom-mcp](https://github.com/Automaat/lightroom-mcp) (108 stars), and
+[samuelgursky/davinci-resolve-mcp](https://github.com/samuelgursky/davinci-resolve-mcp)
+(3,211 stars), checked September 28, 2026. Selection also considered maintenance,
+Windows support, licenses and installability. See the
+[comparison and setup requirements](docs/DESKTOP.md#creative-mcp-selection-september-28-2026).
 
 The following are planned work, not capabilities of the current release:
 
@@ -104,12 +118,13 @@ The following are planned work, not capabilities of the current release:
   add editing only with the same safeguards. Remote servers and arbitrary tools
   require a separate permissions design. MCP standardizes tool access; it does
   not replace processing models or improve image quality by itself.
-- **Adobe MCP adapters:** evaluate additional Photoshop/Lightroom operations and
-  a Premiere CEP/UXP connector behind the existing workflow safeguards. Keep
-  the tested photo bridges until a candidate demonstrates a useful improvement
-  on synthetic host tests. See the [Adobe MCP assessment](docs/DESKTOP.md#adobe-mcp-assessment-september-28-2026)
-  for reviewed candidates and the virtual-copy compatibility requirement.
-- **Video editing:** begin with local import/probing, timeline trim/split, audio
+- **Creative MCP editing adapters:** extend the bundled servers beyond bounded
+  inspection only after synthetic host tests preserve virtual copies, original
+  documents, explicit export destinations and cancellation without mutation retries.
+  Upstream tools are available through the optional external-client configuration;
+  that does not give them unrestricted access inside Photo Studio chat.
+- **Video editing with DaVinci Resolve:** build on the bundled Resolve MCP for
+  local import/probing, timeline trim/split, audio
   sync, proxy playback and explicit export presets. Keep originals and edit
   decisions separate, with cancellable jobs and verified duration, timestamps,
   frame rate, audio and color metadata. Evaluate FFmpeg-based processing and its

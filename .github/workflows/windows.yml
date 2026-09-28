@@ -36,6 +36,11 @@ jobs:
         run: python packaging/build_backend.py --native .cache/native/selective_scan_cuda.pyd
       - name: Setup boundary tests
         run: python -m unittest tests.test_desktop_installation
+      - name: Bundled creative MCP boundaries and startup
+        run: |
+          python -m unittest tests.test_creative_mcp
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tests/verify_creative_mcp.py
       - name: Prompt authorization tests
         run: .cache/packaging/bundle/python/python.exe -m unittest tests.test_prompt_master tests.test_focus tests.test_vault_references
       - name: Export precision tests

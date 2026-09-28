@@ -67,6 +67,8 @@ def build(native):
     legal=bundle/'licenses';legal.mkdir(exist_ok=True)
     shutil.copy2(ROOT/'desktop/vendor/opencode/LICENSE',legal/'OpenCode-MIT.txt')
     shutil.copy2(ROOT/'THIRD-PARTY-NOTICES.txt',legal/'THIRD-PARTY-NOTICES.txt')
+    from build_creative_mcp import build as build_creative_mcp
+    build_creative_mcp(bundle)
     subprocess.run([str(bundle/'python/python.exe'),'-c','import tkinter, numpy, PIL, cv2, imagecodecs, win32api, yaml, pillow_heif; print("Bundled runtime imports passed")'],check=True)
     print('Relocatable backend: '+str(bundle))
 
