@@ -130,6 +130,27 @@ the server ignores Range. Hash failure removes only the invalid partial. Disk
 space is checked before downloading. Inference also verifies model hashes.
 After failed mutation inspect preserved evidence before starting a new job.
 
+## Adobe MCP assessment (September 28, 2026)
+
+Keep the tested photo bridges until a specific MCP integration demonstrates an
+improvement. Source review found these candidates; none was installed or enabled:
+
+| Candidate | Reviewed commit | Compatibility finding |
+| --- | --- | --- |
+| [Photoshop MCP](https://github.com/alisaitteke/photoshop-mcp) | `25d914a6b637230e77410479d0b8f1f715c14c49` | Windows still uses an Adobe script bridge; additional tools and optional UXP support need host testing. |
+| [Lightroom MCP](https://github.com/Automaat/lightroom-mcp) | `5af7a87824f8ff34587b870fc43b04e5fda127b5` | Its `setDevelopSettings` edits the referenced photo directly. Photo Studio creates a virtual copy; an adapter must retain that invariant. Catalog/preset tools may add useful capabilities. |
+| [Premiere MCP](https://github.com/leancoderkavy/premiere-pro-mcp) | `f610059a765c9cfc659b818c8c23b7c4995af978` | CEP/UXP timeline/export tools require live capability verification. Premiere was not found beside the installed Adobe applications; no host test was performed. |
+
+Oh My Pi already supports MCP. Enabling discovery alone is insufficient: the
+photo extension binds original user authorization, restricts active tools and
+propagates progress/cancellation; the broker also validates tool names. Preserve
+those boundaries when admitting namespaced MCP tools. For a concrete missing
+operation, pin the server/connector, verify state reads, then compare synthetic
+edits and exports. Require original/document preservation, correct color/output,
+and safe timeout/disconnect/cancellation without duplicate mutations. A failed
+edit must never be automatically replayed through a different bridge. MCP itself
+does not increase pixel quality. The current clean-reinstall state remains intact.
+
 ## Future video boundary
 
 Sessions, media browsing, jobs/events, installation, settings and result navigation

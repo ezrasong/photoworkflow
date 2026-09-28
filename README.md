@@ -104,6 +104,11 @@ The following are planned work, not capabilities of the current release:
   add editing only with the same safeguards. Remote servers and arbitrary tools
   require a separate permissions design. MCP standardizes tool access; it does
   not replace processing models or improve image quality by itself.
+- **Adobe MCP adapters:** evaluate additional Photoshop/Lightroom operations and
+  a Premiere CEP/UXP connector behind the existing workflow safeguards. Keep
+  the tested photo bridges until a candidate demonstrates a useful improvement
+  on synthetic host tests. See the [Adobe MCP assessment](docs/DESKTOP.md#adobe-mcp-assessment-september-28-2026)
+  for reviewed candidates and the virtual-copy compatibility requirement.
 - **Video editing:** begin with local import/probing, timeline trim/split, audio
   sync, proxy playback and explicit export presets. Keep originals and edit
   decisions separate, with cancellable jobs and verified duration, timestamps,
