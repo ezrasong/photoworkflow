@@ -50,6 +50,8 @@
       "group": "photo"
     },
     "apps/oh-my-pi/omp-windows-x64.exe": {
+      "repository": "can1357/oh-my-pi",
+      "commit": "7853b4e499936f9dcc13c9b64adb55f6b342aabf",
       "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.2/omp-windows-x64.exe",
       "sha256": "5d99fe5c11ec3ff1792e427c0e61eeb5a6c84670cadb65d023dd2f5eb8705f40",
       "bytes": 235686912,
@@ -119,6 +121,8 @@
       "extract": "wheel"
     },
     ".cache/Obsidian-1.13.7.exe": {
+      "repository": "obsidianmd/obsidian-releases",
+      "commit": "11fc3ae2320769a5db81b9029ab644928540f9b8",
       "url": "https://github.com/obsidianmd/obsidian-releases/releases/download/v1.13.7/Obsidian-1.13.7.exe",
       "sha256": "f233dc24896b3f2d5f9e4b01111181a561d0760b2105f0a474024c5f3143a9bc",
       "bytes": 331012528,

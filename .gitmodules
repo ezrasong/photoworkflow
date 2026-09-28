@@ -4,3 +4,12 @@
 [submodule "vendor/obsidian-releases"]
 	path = vendor/obsidian-releases
 	url = https://github.com/obsidianmd/obsidian-releases.git
+[submodule "vendor/photoshop-mcp"]
+	path = vendor/photoshop-mcp
+	url = https://github.com/alisaitteke/photoshop-mcp.git
+[submodule "vendor/lightroom-mcp"]
+	path = vendor/lightroom-mcp
+	url = https://github.com/Automaat/lightroom-mcp.git
+[submodule "vendor/davinci-resolve-mcp"]
+	path = vendor/davinci-resolve-mcp
+	url = https://github.com/samuelgursky/davinci-resolve-mcp.git

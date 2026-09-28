@@ -74,13 +74,20 @@ is necessary; existing user notes are never rewritten for branding.
 
 ## Build
 
-Use `git submodule update --init --recursive` to populate the pinned Oh My Pi
-source and Obsidian release-metadata repositories under `vendor/`. These are
+Use `git submodule update --init --recursive` to populate the pinned Oh My Pi,
+Obsidian release metadata, and Photoshop/Lightroom/Resolve MCP repositories under
+`vendor/`. These are
 upstream reference checkouts, not build inputs or mutable application directories.
 The installer remains reproducible from the pinned release manifests without
-fetching the submodules. To upgrade either application, review its upstream
+fetching the submodules. To upgrade an upstream component, review its upstream
 changes, update the gitlink and release/version/hash pins together, retain the
 matching distribution notices, and repeat setup/integration acceptance checks.
+
+`.github/dependabot.yml` checks all submodules daily and opens update PRs that
+trigger Windows CI. `python scripts/verify_submodules.py` checks gitlinks against
+the source commit fields in the packaging manifests without fetching submodules.
+Source-only bumps fail until packaged releases and their hashes are reconciled;
+passing tests against an old binary is not evidence for a newer upstream source.
 
 Use Node 22, Python 3.12+ and uv 0.12.13 on Windows x64. Download
 selective_scan_cuda.pyd from the private repository's native-runtime-v1 release.

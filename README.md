@@ -88,6 +88,9 @@ Upstream repositories are pinned as Git submodules:
 | --- | --- | --- |
 | `vendor/oh-my-pi` | `v18.3.2` | Assistant source, protocol documentation and upstream license. |
 | `vendor/obsidian-releases` | `v1.13.7` | Official Obsidian release metadata; the desktop application is closed-source. |
+| `vendor/photoshop-mcp` | `v1.7.24` | Photoshop MCP source matching the bundled server. |
+| `vendor/lightroom-mcp` | `v0.17.0` | Lightroom MCP server and plug-in source. |
+| `vendor/davinci-resolve-mcp` | `v4.8.22` | DaVinci Resolve MCP source matching the bundled server. |
 
 Clone with `git clone --recurse-submodules <repository-url>`, or run
 `git submodule update --init --recursive` in an existing checkout. The parent
@@ -97,6 +100,24 @@ Windows releases in `packaging/downloads.json` and verifies Obsidian's publisher
 Submodule checkouts are for upstream reference and maintenance; they are not
 installed or required to run Photo Studio. Runtime licenses/notices remain in
 the installer, and user vaults and assistant profiles stay outside the submodules.
+
+Dependabot checks **all five submodules daily at 09:00 America/Toronto** and opens
+update pull requests. Each PR automatically runs the Windows Actions workflow.
+All upstream changes are eligible, including stability fixes, security patches
+and features; detection can take up to a day and does not rely on commit-message
+keywords. Source updates are proposed for review, never automatically merged or
+shipped to installed apps.
+
+CI checks the Git submodule commits against `packaging/creative-mcp.json` and
+`packaging/downloads.json` before building. A source-only update intentionally
+fails this check until its matching release URLs, versions, hashes, notices and
+source pins are reviewed together. Update any corresponding seed manifests too,
+then rerun the build and integration checks. An upstream change without a suitable
+Windows release stays pending. The existing version-tag release process publishes
+approved updates to the app's updater.
+
+Redundant branch builds are cancelled when newer commits arrive. CI artifacts
+expire after 14 days; published release installers remain available independently.
 
 See [build/setup and architecture](docs/DESKTOP.md),
 [capability coverage](docs/CAPABILITIES.md),
