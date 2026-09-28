@@ -6,6 +6,7 @@ import { promises as fs } from 'node:fs'
 import { join, resolve, relative, isAbsolute, extname } from 'node:path'
 import { createWindow, registerRendererProtocol, trusted } from './windows'
 import { referenceBrowser } from './browser'
+import { createUpdates } from './updates'
 
 // Retain the established profile and workspace across the display-name change.
 app.setPath('userData', join(app.getPath('appData'), 'photo-workflow'))
@@ -71,8 +72,20 @@ async function start(){
   backend.stderr.on('data',data=>void fs.appendFile(join(home,'backend.log'),data))
   backend.on('error',error=>{for(const p of pending.values())p.reject(error);pending.clear();if(!win.isDestroyed())win.webContents.send('photo:event',{type:'error',text:error.message})})
   backend.on('exit',code=>{for(const p of pending.values())p.reject(new Error('Backend exited: '+code));pending.clear();if(!closing&&!win.isDestroyed())win.webContents.send('photo:event',{type:'error',text:'Backend stopped. Restart the app; user files are preserved.'})})
+  async function stopBackend(){
+    closing=true
+    await send('cancel').catch(()=>{})
+    const exited=new Promise<void>(resolve=>{if(backend.exitCode!==null)resolve();else backend.once('exit',()=>resolve())})
+    backend.stdin.end()
+    await exited
+  }
+  const updates=createUpdates(state=>{if(!win.isDestroyed())win.webContents.send('photo:event',{type:'updates',...state})},()=>busy||closing||pending.size>0,stopBackend)
+  const updatesReady=updates.initialize()
+  ipcMain.handle('photo:updates',async(event,action,value)=>{validateCaller(event);await updatesReady;if(closing)throw new Error('Photo Studio is closing');return updates.command(action,value)})
+  win.on('closed',updates.dispose)
   ipcMain.handle('photo:call',async(event,method,args)=>{
     validateCaller(event)
+    if(closing)throw new Error('Photo Studio is closing')
     if(!allowed.has(method)||!args||typeof args!=='object'||JSON.stringify(args).length>64000)throw new Error('Unsupported request')
     if(method==='select'){if(!Array.isArray(args.paths)||args.paths.length>4)throw new Error('Invalid selection');args.paths=await Promise.all(args.paths.map(permitted))}
     if(method==='process')args.source=await permitted(args.source)
@@ -108,9 +121,7 @@ async function start(){
     event.preventDefault()
     void (async()=>{
       if(busy){const choice=await dialog.showMessageBox(win,{type:'question',buttons:['Keep working','Stop safely and close'],defaultId:0,cancelId:0,message:'A job is running. Closing waits for a safe model or Adobe boundary.'});if(choice.response===0)return}
-      closing=true;await send('cancel').catch(()=>{});backend.stdin.end()
-      // Wait for Python to drain jobs and OMP to release its owned runtime.
-      if(backend.exitCode===null)await new Promise<void>(resolve=>backend.once('exit',()=>resolve()))
+      await stopBackend()
       win.destroy();app.quit()
     })()
   })

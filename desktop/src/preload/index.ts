@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('photo', {
   drop:(files:File[])=>ipcRenderer.invoke('photo:drop',files.map(file=>webUtils.getPathForFile(file))),
   preview:(path:string,full=false)=>ipcRenderer.invoke('photo:preview',path,full),
   browser:(action:string,args:unknown={})=>ipcRenderer.invoke('photo:browser',action,args),
+  updates:(action:string,value?:string)=>ipcRenderer.invoke('photo:updates',action,value),
   reveal:(path:string)=>ipcRenderer.invoke('photo:reveal',path),
   events:(callback:(event:unknown)=>void)=>{
     const listener=(_:unknown,event:unknown)=>callback(event)

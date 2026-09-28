@@ -1,6 +1,6 @@
 {
   "name": "photo-workflow",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": true,
   "description": "Private local photo editing, restoration and review",
   "author": "Photo Studio contributors",
@@ -15,6 +15,7 @@
     "test:installer": "node scripts/installer-gates.cjs"
   },
   "dependencies": {
+    "electron-updater": "6.8.9",
     "electron-window-state": "5.0.3"
   },
   "devDependencies": {
@@ -67,6 +68,14 @@
       "deleteAppDataOnUninstall": false,
       "include": "resources/installer.nsh"
     },
-    "publish": null
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "ezrasong",
+        "repo": "photoworkflow",
+        "private": true,
+        "releaseType": "release"
+      }
+    ]
   }
 }

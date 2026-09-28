@@ -59,7 +59,7 @@ class CreativeMcpTests(unittest.TestCase):
                 self.assertFalse({'OPENAI_API_KEY', 'NODE_OPTIONS', 'PYTHONPATH', 'HTTP_PROXY'} & env.keys())
                 self.assertEqual(env['ANALYTICS_DISABLED'], '1')
                 self.assertEqual(env['DAVINCI_RESOLVE_MCP_UPDATE_CHECK'], '0')
-                self.assertTrue(state.is_relative_to(Path(temp)))
+                self.assertTrue(state.is_relative_to(Path(temp).resolve()))
 
     def test_unknown_server_and_pre_cancel_never_spawn(self):
         with patch.object(creative_mcp.subprocess, 'Popen') as spawn:

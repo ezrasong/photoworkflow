@@ -58,7 +58,7 @@ textarea,input,select{font:inherit;background:var(--background-base);color:var(-
 .setup .hardware{display:flex;flex-direction:column;gap:var(--space-2)}
 .setup .hardware p{margin:0}
 .dependency>div{display:flex;flex-direction:column;gap:var(--space-1)}
-.dependency .dependency-actions{flex-direction:row;flex-wrap:wrap;gap:var(--space-2)}
+.setup .dependency-actions{display:flex;flex-direction:row;flex-wrap:wrap;gap:var(--space-2)}
 .dependency p,.dependency details{margin:var(--space-2) 0 0}
 .details>:is(p,label,details,.prompt-suggestions)+*,.review-footer>details+details{margin-top:var(--space-3)}
 .details>p,.welcome p,.message p,.prompt-pair p{margin-block:var(--space-2)}

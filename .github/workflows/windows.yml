@@ -13,6 +13,12 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+      - name: Validate release version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $version = (Get-Content desktop/package.json | ConvertFrom-Json).version
+          if ($env:GITHUB_REF_NAME -ne "v$version") { throw 'Release tag must match desktop/package.json' }
       - uses: actions/setup-node@v4
         with:
           node-version: '22.22.3'
@@ -65,6 +71,9 @@ jobs:
       - name: Packaged application smoke test
         working-directory: desktop
         run: npm run smoke
+      - name: Verify automatic update feed
+        working-directory: desktop
+        run: node scripts/verify-update-metadata.cjs
       - name: Installer completion gates
         working-directory: desktop
         run: npm run test:installer
@@ -84,6 +93,8 @@ jobs:
           path: |
             desktop/dist/*Setup.exe
             desktop/dist/*.sha256
+            desktop/dist/latest.yml
+            desktop/dist/*.blockmap
             .cache/desktop-smoke-report.json
           if-no-files-found: error
   release:
@@ -101,9 +112,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          existing=$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft 2>/dev/null || true)
+          if [ "$existing" = "false" ]; then
             echo "Release already published; preserving its installer and checksum."
           else
-            gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "Photo Studio $GITHUB_REF_NAME" --notes "Windows x64 photo desktop. See verification and limitations in the repository. Signing is available only when configured; check the downloaded executable signature."
-            find artifacts -type f \( -name '*Setup.exe' -o -name '*.sha256' \) -exec gh release upload "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" {} +
+            metadata=$(find artifacts -type f -name latest.yml -print -quit)
+            test -n "$metadata" && test -s "$metadata"
+            if [ "$existing" != "true" ]; then
+              gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft --title "Photo Studio $GITHUB_REF_NAME" --notes "Windows x64 photo desktop with private GitHub updates. Install this version once, then enable updates in Settings with read-only repository access. See repository verification notes and limitations."
+            fi
+            find artifacts -type f \( -name '*Setup.exe' -o -name '*.sha256' -o -name '*.blockmap' -o -name 'latest.yml' \) -exec gh release upload "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --clobber {} +
+            gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false --latest
           fi

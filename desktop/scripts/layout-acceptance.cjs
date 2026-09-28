@@ -9,9 +9,9 @@ async function fixture(){
  const results=[{name:long,path:'C:/Synthetic/result',details:{baseline_file:'original.png',composite_file:'result.png'}}];
  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><rect width="1200" height="800" fill="#34536b"/><circle cx="400" cy="400" r="250" fill="#d9b786"/><path d="M0 700 L1200 100" stroke="#7ba392" stroke-width="70"/></svg>';
  const preview='data:image/svg+xml;base64,'+Buffer.from(svg).toString('base64');
- let listener=()=>{};
+ const listeners=new Set();const listener=e=>listeners.forEach(cb=>cb(e));
  contextBridge.exposeInMainWorld('photo',{
- events:cb=>{listener=cb;return()=>{}},pick:async()=>[source],drop:async()=>[source],preview:async()=>preview,reveal:async()=>true,
+ updates:async()=>({version:'0.1.7',connected:true,phase:'ready',availableVersion:'0.1.8',message:'Update downloaded and verified.'}),events:cb=>{listeners.add(cb);return()=>listeners.delete(cb)},pick:async()=>[source],drop:async()=>[source],preview:async()=>preview,reveal:async()=>true,
  browser:async(action,args)=>{if(action==='bounds'&&(!Object.values(args).every(Number.isFinite)||args.x<0||args.y<0))throw Error('Invalid fixture bounds');return true},
  call:async(method,args={})=>{
  if(method==='status')return {home:'C:/Synthetic/'+long,plugin:'C:/Synthetic/'+long+'/plugin',free:400*1024**3,gpu:{name:long,memory:32*1024**3,capability:[12,0]},adobe:{},creativeMcp:['photoshop','lightroom','resolve'].map(id=>({id,name:id,version:'1.0.0',bundled:true})),mcpConfig:'C:/Synthetic/config.json',mcpPlugin:'C:/Synthetic/LightroomMCP.lrplugin',dependencies:['runtime','assistant','photo','legacy','obsidian'].map(group=>({group,bytes:8*1024**3,missingBytes:8*1024**3})),sessions:Array.from({length:24},(_,i)=>({id:''+i,title:long+' '+i,updated:1})),results};
@@ -79,6 +79,7 @@ async function details(page){const button=page.getByRole('button',{name:'Control
   await settle(page);console.log('Checking',label);await page.reload();await page.getByRole('button',{name:'Install / repair complete setup',exact:true}).waitFor();await settle(page)
   const effective=await page.evaluate(()=>[innerWidth,innerHeight]);assert.ok(Math.abs(effective[0]-width/scale)<=2&&Math.abs(effective[1]-height/scale)<=2,label+' effective viewport '+effective);await noOverflow(page,label+' setup');await reachable(page.getByRole('button',{name:'Install / repair complete setup',exact:true}));
   await reachable(page.getByRole('button',{name:'Show workspace',exact:true}));
+  await reachable(page.getByRole('button',{name:'Restart and install update',exact:true}));
   await reachable(page.getByRole('button',{name:'Inspect app',exact:true}).last());await page.getByRole('button',{name:'Inspect app',exact:true}).last().click();await page.getByText('App needs attention',{exact:false}).waitFor();await reachable(page.getByRole('button',{name:'Show MCP configuration',exact:true}));await noOverflow(page,label+' MCP results');
   await cardSpacing(page,label)
   if(scale===1)await page.screenshot({path:path.join(out,label+'-mcp.png')});

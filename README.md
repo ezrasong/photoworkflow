@@ -19,6 +19,20 @@ The installer also includes Photoshop, Lightroom Classic and DaVinci Resolve
 MCP servers with private Node/Python dependencies. The licensed creative apps
 and NVIDIA driver must already be installed separately.
 
+### Automatic updates
+
+Install version 0.1.7 once to enable the updater; older builds cannot update themselves.
+In **Settings > App updates**, enter a GitHub fine-grained token restricted to this
+repository with **Contents: read-only** permission. Photo Studio stores it encrypted
+with your Windows account; no shared token is bundled in the application.
+
+The app checks the private release channel on launch and every six hours, downloads
+new stable installers, and verifies their SHA-512 digest. Choose **Restart and install
+update** when idle. Active editing is never interrupted by an automatic restart;
+normal app exit does not install updates. **Disconnect updates** removes saved access.
+Network/authentication failures leave the current installation working. Your workspace
+remains outside the install directory, and setup resumes changed component downloads.
+
 Windows can be resized down to 640×480. Use the menu for navigation; narrower
 views switch between Conversation and Controls & review. Short views scroll.
 Composer actions stay on one row; scroll the actions horizontally in narrow panes.

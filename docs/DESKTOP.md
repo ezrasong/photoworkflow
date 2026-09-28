@@ -214,3 +214,35 @@ Sessions, media browsing, jobs/events, installation, settings and result navigat
 belong to the desktop. Photo validation, recipes, codecs and Adobe tools remain
 in Python photo modules. Future video can add concrete job methods and result
 readers at these boundaries. No video engine or speculative plugin system exists.
+
+
+## Private GitHub automatic updates
+
+`electron-updater` 6.8.9 owns release selection, installer download, digest validation
+and NSIS launch. The main process fixes the provider to ezrasong/photoworkflow and
+stable releases, with downgrades disabled. Metadata (`latest.yml`), installer and
+blockmap are generated together and verified against the package version and SHA-512.
+CI publishes the release as a draft, uploads all assets, then marks it latest only
+after validation. Reruns preserve published releases and can finish a partial draft.
+Version tags must match desktop/package.json.
+
+Private releases require user-supplied GitHub access. A fine-grained Contents: read-only
+token for this repository is sufficient. Electron safeStorage uses Windows DPAPI;
+only encrypted bytes are atomically saved in userData/update-access.bin. Tokens stay
+in the main process, never enter Python/MCP environments or the update manifest, and
+are never returned through IPC or included in forwarded error messages. The update
+bridge shares renderer/frame validation with the existing capabilities and exposes
+only status, connect, disconnect, check and install. No generic URL or process launch
+is exposed. No repository visibility or GitHub account settings are changed.
+
+Once connected, checks run on app launch and every six hours while idle. New installers
+download automatically, with a single in-flight operation. Settings displays progress,
+errors and the ready-to-install action. Installation requires idle status and no pending
+backend calls; IPC stops accepting photo jobs while Python drains and releases owned
+runtimes. NSIS runs interactively so changed component downloads and failures remain
+visible. Ordinary exit never triggers an update. Full installer downloads are used
+because private old-version blockmap access is unreliable. User data remains preserved.
+
+Signing secrets are not currently configured. Release transport and SHA-512 are checked;
+Authenticode publisher verification becomes available when a signing certificate is
+configured. There is no embedded signing identity or GitHub credential.
