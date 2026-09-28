@@ -29,10 +29,16 @@ private photographs and notes were not uploaded.
 - Dark/light setup and empty-studio screens inspected visually. Upstream controls
   are adapted with quieter button styling; this is not pixel-identical coverage
   of all OpenCode screens.
+- NSIS install to a chosen test directory, desktop shortcut creation, installed
+  app launch, 0.1.0 → 0.1.1 upgrade, and uninstall. Original image, 16-bit output,
+  note and settings hashes remained identical across upgrade and uninstall.
+  Upgraded AppData output preview and soft-focus controls passed. The test install
+  was removed; its test user data is preserved.
 
 Local detailed reports are retained in .cache/desktop-smoke-report.json,
 .cache/desktop-integration-report.json, .cache/desktop-download-acceptance-report.json,
-and .cache/desktop-browser-report.json. They are intentionally not committed.
+and .cache/desktop-browser-report.json. Installer evidence is in
+.cache/desktop-installer-report.json. They are intentionally not committed.
 
 ## Verification limits
 
