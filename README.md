@@ -120,3 +120,9 @@ The following are planned work, not capabilities of the current release:
   only where tests show a useful improvement. Larger dimensions or bit depth
   alone do not recover lost detail; the current 8-bit preview is separate from
   the saved high-precision output.
+
+Export baseline testing has started: synthetic TIFF round-trips retain all
+65,536 levels exactly, and actual Photoshop PSD/PSB composites differed from
+the test TIFFs by at most 2/65535 per channel. See the
+[measured export checks and reproduction commands](docs/VERIFICATION.md).
+These results establish export fidelity, not improved model or HDR quality.

@@ -3,6 +3,37 @@
 Windows x64 verification, September 27–28, 2026. Tests used synthetic images;
 private photographs and notes were not uploaded.
 
+## Export quality baseline — September 28, 2026
+
+Seven new synthetic export tests passed in both the development and bundled
+Python runtimes; all 20 focused export/setup/prompt/focus/vault tests passed
+together. The new export suite is included in Windows CI. No processing or export
+implementation was changed; this establishes a baseline for future improvements.
+
+- All 65,536 channel values survived TIFF save/read and 16-bit ICC conversion
+  exactly, including after ten save/load cycles. 16-bit PNG and grayscale TIFF
+  retained low bits; all eight EXIF orientations retained sample values.
+- Float32 exposure edits stayed within one 16-bit level of a float64 reference
+  at -3, -0.125, +0.125 and +3 stops. Expected black/white clipping was preserved.
+  Preview creation did not modify source pixels; mask TIFFs remained exact.
+  Invalid ICC profiles and unsupported floating-point HDR inputs were rejected.
+- The actual deterministic pipeline produced an exact no-op TIFF and preserved
+  original pixels outside the editing mask. TIFF assets retained 16-bit samples
+  and the sRGB ICC profile; repeated jobs reused hash-verified outputs.
+- Real Photoshop 27.8.0 PSD and PSB exports retained two layers and embedded ICC
+  profiles. Baseline layers and masks had maximum error **1/65535**; merged
+  composites had maximum error **2/65535** against the pipeline TIFFs. Saved masks
+  retained **32,769** distinct levels, matching Photoshop's internal precision.
+  Sources, masks and pre-existing Photoshop documents were preserved. PSB used
+  a forced format threshold on a small fixture, not a new large-file stress test.
+
+Run `python -m unittest tests.test_export_quality` for model-free, Adobe-free
+checks. Run `python -m tests.verify_export_quality` explicitly on a licensed
+Photoshop workstation for real layered exports. The latter leaves synthetic
+artifacts and `outputs/latest-export-quality-verification.json`. It downloads
+nothing and does not reinstall Photo Studio. Perceptual model quality, wider-gamut
+exports and HDR remain separate work; no improvement to those is claimed here.
+
 ## Version 0.1.4 — Photo Studio
 
 The simpler product name replaces Luma Atelier. Wide windows again open with the
