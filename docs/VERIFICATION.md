@@ -1,264 +1,282 @@
-# Verification record
+# Verification record
+
+Windows x64 verification, September 27–28, 2026. Tests used synthetic images;
+private photographs and notes were not uploaded.
+
+## Export quality baseline — September 28, 2026
+
+Seven new synthetic export tests passed in both the development and bundled
+Python runtimes; all 20 focused export/setup/prompt/focus/vault tests passed
+together. The new export suite is included in Windows CI. No processing or export
+implementation was changed; this establishes a baseline for future improvements.
+
+- All 65,536 channel values survived TIFF save/read and 16-bit ICC conversion
+  exactly, including after ten save/load cycles. 16-bit PNG and grayscale TIFF
+  retained low bits; all eight EXIF orientations retained sample values.
+- Float32 exposure edits stayed within one 16-bit level of a float64 reference
+  at -3, -0.125, +0.125 and +3 stops. Expected black/white clipping was preserved.
+  Preview creation did not modify source pixels; mask TIFFs remained exact.
+  Invalid ICC profiles and unsupported floating-point HDR inputs were rejected.
+- The actual deterministic pipeline produced an exact no-op TIFF and preserved
+  original pixels outside the editing mask. TIFF assets retained 16-bit samples
+  and the sRGB ICC profile; repeated jobs reused hash-verified outputs.
+- Real Photoshop 27.8.0 PSD and PSB exports retained two layers and embedded ICC
+  profiles. Baseline layers and masks had maximum error **1/65535**; merged
+  composites had maximum error **2/65535** against the pipeline TIFFs. Saved masks
+  retained **32,769** distinct levels, matching Photoshop's internal precision.
+  Sources, masks and pre-existing Photoshop documents were preserved. PSB used
+  a forced format threshold on a small fixture, not a new large-file stress test.
+
+Run `python -m unittest tests.test_export_quality` for model-free, Adobe-free
+checks. Run `python -m tests.verify_export_quality` explicitly on a licensed
+Photoshop workstation for real layered exports. The latter leaves synthetic
+artifacts and `outputs/latest-export-quality-verification.json`. It downloads
+nothing and does not reinstall Photo Studio. Perceptual model quality, wider-gamut
+exports and HDR remain separate work; no improvement to those is claimed here.
+
+## Version 0.1.4 — Photo Studio
+
+The simpler product name replaces Luma Atelier. Wide windows again open with the
+familiar navigation sidebar and split chat/controls view; the icon rail remains
+available in narrower views. The 640×480 Windows minimum remains enforced.
+A CI-only test fixture failure caused by an unresolved Windows short temporary
+path was fixed by resolving the fixture root, preserving production validation.
+
+- Rebuilt the redistributable Python backend and NSIS installer. TypeScript/Vite,
+  desktop bridge tests, all 13 focused Python tests, major-editing boundaries and
+  npm audit passed (zero advisories).
+- Repeated the six-size layout matrix, effective 100–200% scaling and separate
+  enlarged-text checks. Native Windows computer-use checks inspected wide,
+  portrait and short layouts, navigation, scrolling and the file dialog.
+  Attempting a smaller window clamped to the 640×480 minimum; the composer and
+  Controls & review switch remained reachable, including the lower controls.
+- Repeated packaged empty-workspace smoke and public-browser isolation checks.
+  Browser bounds passed all six sizes at actual Electron zoom 1, 1.25, 1.5 and 2.
+  Smoke verified synthetic tone/focus output, original preservation, cancellation,
+  review, missing-dependency errors and settings/results after restart with
+  developer Python/Node removed from PATH.
+- Real NSIS 0.1.2 → 0.1.4 upgrade passed with the same uninstall GUID and
+  AppData workspace. Executable and shortcuts used Photo Studio; the original,
+  TIFF output, note and settings hashes matched. The registered uninstaller
+  subsequently removed the application and shortcuts while preserving the data.
+- Windows CI passed for release source commit `2864a77`. Published installer
+  SHA-256 matched GitHub's asset digest. The installer is unsigned.
+- Final clean-reinstall preparation removed 357 validated, exclusively owned
+  model/runtime/cache targets across the development and test workspaces.
+  All 4,537 preservation-manifest file hashes matched afterward. Source, photos,
+  outputs, vaults, notes, credentials and recovery backups remain. Isolated build
+  dependencies remain for maintenance; installed setup only uses its own workspace
+  and cannot reuse them. The application is left uninstalled, and the default
+  workspace has no downloaded setup dependencies. The user's reinstall is pending.
+
+Final local evidence: `.cache/rename-installer-report.json` and
+`.cache/reinstall-final-report.json`. The cleanup inventory and preservation
+manifests remain local and are excluded from Git.
+
+## Version 0.1.3 — Luma Atelier
+
+- TypeScript/Vite build, desktop bridge test, 13 Python unit tests, existing
+  major-editing boundary suite and dependency audit passed (zero advisories).
+- Rendered synthetic layout checks passed at 640×480, 800×600, 1280×720,
+  1920×1080, 900×1400 and 2560×720, with effective viewports representing
+  100%, 125%, 150% and 200% scaling. Separate 125–200% enlarged-text checks
+  passed at 640×480. Fixtures include 24 sessions, long paths/messages, crowded
+  setup and comparison pixels. Checks cover reachable actions/composer,
+  keyboard tab focus, image aspect ratio and absence of document overflow.
+  Representative rendered screenshots were inspected.
+- Packaged public HTTPS browser navigation and isolation passed. Native child
+  bounds matched clipped renderer rectangles across all six window sizes at
+  actual Electron zoom factors 1, 1.25, 1.5 and 2. File/private-network URLs,
+  preload/Node access and tab visibility protections remain enforced.
+- Packaged smoke passed with developer Python/Node removed from the child PATH
+  and a fresh isolated workspace: setup entry, picker, IPC rejection, missing
+  dependencies, synthetic 16-bit tone/focus edits, split/native-pixel review,
+  cancellation, original preservation and settings/results after restart.
+- Packaged SCUNet CUDA denoise and the actual local assistant passed on a
+  synthetic image using retained pinned assets. Prompt correction preserved both
+  versions; real Oh My Pi RPC/tool events, session reopening, worker-lock
+  availability, native Tk review readiness and graceful shutdown passed.
+- Actual NSIS 0.1.2 → 0.1.3 rename upgrade passed. The uninstall GUID stayed
+  unchanged, the old executable/shortcuts were replaced, and the renamed app
+  reopened the same AppData workspace. Synthetic original, TIFF output, note and
+  settings hashes matched; output preview and soft-focus controls worked.
+- Git branch/tag history and commit metadata were inspected. Published history
+  contains no private context Markdown or development-agent commit attribution;
+  a rewrite was unnecessary. The existing five-document allowlist was retained
+  and explicit context exclusions strengthened. Native runtime release retained.
+
+Evidence: .cache/layout-acceptance/report.json and rendered PNGs,
+.cache/desktop-browser-report.json, .cache/desktop-smoke-report.json,
+.cache/desktop-integration-report.json and .cache/rename-installer-report.json.
+Scaling checks exercise effective viewport reflow and enlarged text, plus real
+Electron zoom for browser bounds; they do not replace manual Windows display
+settings and assistive-technology acceptance. The user's fresh reinstall remains
+an independent final acceptance test.
+
+## Version 0.1.2 additions
+
+- Thirteen setup, prompt, vault-reference and focus tests passed. New coverage
+  includes complete setup ordering/failure/cancellation, a single final completion
+  event, inspection-only suggestions, invalid model output, reference provenance,
+  inert Markdown metadata and preservation of existing notes/source bytes.
+- Live Wikimedia Commons search, image download, attribution/hash verification
+  and chooser-to-vault saving passed. Opening a suggested query does not submit it.
+- Real local Qwen3-VL inspection returned editable suggestions for a synthetic
+  image. Suggestions do not submit an editing prompt.
+- Obsidian's pinned official installer passed publisher verification, extraction,
+  executable presence and isolated vault registration. The signature checker now
+  explicitly imports Windows PowerShell's built-in security module, avoiding
+  incompatible modules inherited from another PowerShell installation.
+- Packaged empty-workspace smoke passed, including automatic setup display,
+  synthetic tone/focus edits, cancellation, original preservation and relaunch.
+- Packaged complete setup passed in a fresh workspace using cached downloads,
+  with every pinned hash verified and every component extracted. Runtime,
+  assistant, photo, legacy and Obsidian completed in order; only the final event
+  released setup. After restart, Torch 2.7.1+cu128 detected the RTX 5090. The real
+  Qwen3-VL suggestion UI filled a draft without submission, edits or source changes.
+  Its synthetic screenshot was inspected.
+
+Evidence: .cache/prompt-suggestion-acceptance/report.json,
+.cache/obsidian-setup-acceptance-report.json,
+.cache/complete-setup-acceptance-report.json and the updated smoke report.
+The 0.1.2 checks above were performed on a local build before the 0.1.3 release.
+
+## Passed locally
+
+- Fresh pinned redistributable Python imports, TypeScript/Vite production build,
+  desktop bridge test, and npm audit (zero reported vulnerabilities).
+- Nine setup, prompt-authorization and focus-correction tests. Focus tests cover
+  known mild Gaussian blur, tiled continuity, unchanged flat fields, cancellation,
+  numeric bounds, precision, and unchanged pixels outside the supplied mask.
+- Existing major-editing boundary suite: reconstruction opt-ins, selection/no-op,
+  failed follow-up, no mutation retry, cancellation, profile isolation, Adobe locks.
+- Packaged app in an empty workspace: startup without developer Python/models,
+  file picker, unsupported IPC rejection, actionable missing-model errors,
+  synthetic tone edit and soft-focus operation, 16-bit TIFF, original-byte
+  preservation, embedded split/100% review, safe cancellation, and saved data
+  after shutdown/relaunch.
+- Public HTTPS navigation in the embedded reference browser. Remote pages have
+  no preload, photo bridge or Node integration; sandbox enabled. File/loopback/
+  private-network addresses are rejected and switching tabs hides the view.
+- Actual pinned Torch CUDA download, integrity check and extraction; packaged
+  SCUNet on RTX 5090 32 GB, Torch 2.7.1+cu128. This uses downloaded/reused verified
+  assets in a separate acceptance workspace, not the developer virtualenv.
+- Real Oh My Pi RPC, local Prompt Master spelling correction with both versions
+  saved, real photo_status tool and message events, session reopen with selected
+  input, worker-lock availability, native Tk review readiness, graceful shutdown.
+- Dark/light setup and empty-studio screens inspected visually. Upstream controls
+  are adapted with quieter button styling; this is not pixel-identical coverage
+  of all OpenCode screens.
+- NSIS install to a chosen test directory, desktop shortcut creation, installed
+  app launch, 0.1.0 → 0.1.1 upgrade, and uninstall. Original image, 16-bit output,
+  note and settings hashes remained identical across upgrade and uninstall.
+  Upgraded AppData output preview and soft-focus controls passed. The test install
+  was removed; its test user data is preserved.
+
+Local detailed reports are retained in .cache/desktop-smoke-report.json,
+.cache/desktop-integration-report.json, .cache/desktop-download-acceptance-report.json,
+and .cache/desktop-browser-report.json. Installer evidence is in
+.cache/desktop-installer-report.json. They are intentionally not committed.
+
+## Verification limits
+
+- A clean interactive Windows VM was unavailable. A GitHub Windows runner builds
+  and runs packaged smoke checks; that is not a full clean-machine installer test.
+- Packaged real Adobe editing has not been revalidated in this acceptance run.
+  Existing integration boundaries are retained.
+- Installer signing is not configured. Local installer Authenticode status is
+  NotSigned; generic electron-builder signing log entries do not change that.
+- Soft-focus improvement is tested against known synthetic mild blur. Recovery of
+  real severe defocus, motion blur or missing detail is not promised. Review halos
+  and noise at 100%; choose a smaller radius/strength where appropriate.
+- CUDA inference is tested on RTX 5090 32 GB. Other hardware is unverified;
+  the Mamba native binary specifically requires compute capability 12.0.
+- The browser is for public reference reads, not uploads, downloads or account
+  logins. Browser pages are not automatically supplied to the assistant.
+- Advanced masking/batch/legacy assistant controls still use native panels.
+  Prompt Master applies to desktop conversation submissions, not the legacy panel.
+- Video remains future work.
+
+
+## Bundled creative MCP verification — 0.1.5
+
+- Real initialize/tools-list handshakes passed using the shipped Python and a
+  stripped PATH: Photoshop 1.7.24 (125 tools), Lightroom 0.17.0 (18), Resolve
+  4.8.22 (37). Reports: `.cache/creative-mcp-verification.json`.
+- Six new boundary tests cover archive traversal/links, relocatable config,
+  credential/hook isolation, invalid app names and cancellation of a running
+  inspection. All 14 focused setup/prompt/MCP tests passed; 13 bundled-runtime
+  MCP/export precision tests passed.
+- All 27 responsive layout cases passed, including MCP results and actions,
+  small windows, display scaling and enlarged text. Packaged smoke tests passed
+  with no models or developer tools: photo edits, review, cancellation, preserved
+  originals and settings across restart. Reports remain under `.cache`.
+- Native computer-use inspection confirmed the new Setup cards and a successful
+  Photoshop server check showing 125 tools. Native resize gestures did not change
+  the window in this session; the 27 automated resize checks provide that proof.
+- Packaged payload verification checked 27,100 source files: the only omitted
+  entries were two empty `.gitkeep` placeholders filtered by electron-builder.
+- Host limits: Lightroom correctly reports its MCP plug-in is not connected.
+  Photoshop requires an already-running application and document; its initial
+  connection test exposed upstream automatic launching, so the inspector now
+  checks running state before detection. Live document inspection is unverified.
+  Resolve 20.3.2.9 is installed and was opened to Project Manager without opening
+  or editing projects; a live version query timed out. Runtime-state inspection
+  works, but successful live Resolve editing/export is not claimed.
+- Built `PhotoStudio-0.1.5-x64-Setup.exe` (472,718,394 bytes), unsigned. SHA-256:
+  `05229545d9cc17c857603860982b39567376cb4dd51fae529d00ab51ff783b94`.
+  This build was tested from its unpacked payload; NSIS installation was not
+  rerun, preserving the user's uninstalled state for a clean reinstall.
+
+
+## Spacing and installation verification — 0.1.6
+
+- Composer actions remain on one row with a horizontally scrollable action area
+  and fixed Send. All 27 viewport / scaling / enlarged-text cases pass, including
+  equal pane gutters, card padding, non-collapsed spacing between card contents,
+  reachable actions, keyboard focus, comparison aspect ratio and no page overflow.
+- Native computer-use inspection confirmed the Adobe and MCP cards have separated
+  headings, paragraphs, paths and buttons. Windows system-menu resizing succeeded
+  from the wide view to a compact width, then clamped at the configured minimum
+  width and reflowed settings into one column. Native height resizing also
+  clamped at 480, confirming the 640×480 minimum in both dimensions.
+- Eight setup tests pass: verified/resumable downloads, fresh runtime import path,
+  installer success/error/cancel codes, seed preservation, exclusive repair lock,
+  isolated workspace selection and logs. Together with export, prompt and MCP
+  checks, 24 focused bundled-Python tests pass.
+- The production NSIS customInstall macro was compiled into fixture installers
+  and executed for success, failure, cancellation and missing-runtime cases.
+  Only success reached the completion marker; child arguments retained isolation
+  and silent mode. These fixtures do not install the app or change its registry.
+- Native inspection of the real Tk progress UI with synthetic download events
+  confirmed readable progress and working Cancel (exit 2). No model download was
+  performed by this fixture. The full 34.7 GiB production download and live NSIS
+  installation were not rerun; successful end-to-end full setup is not claimed.
+- Packaged smoke passes with isolated synthetic inputs and stripped PATH: startup,
+  IPC/picker boundaries, 16-bit edits, review, browser restrictions, cancellation,
+  and original/output/settings preservation on restart. The reference browser is
+  now created on demand, avoiding an unused, uninitialized Chromium target during
+  startup. No test-only runtime flag or production debugger hook was added.
+- The installer now gates Finish / Launch on complete component setup. Photoshop,
+  Lightroom Classic, Resolve and GPU drivers remain separately installed.
+- Built unsigned `PhotoStudio-0.1.6-x64-Setup.exe` (474,931,742 bytes).
+  SHA-256: `1273887f057edd6da0cb22aeb4d4573bd4ac377d8d369023d9df6e4e4da1e473`. Built and tested locally; not published or installed
+  into the normal user profile.
 
-Windows x64 verification, September 27–28, 2026. Tests used synthetic images;
-private photographs and notes were not uploaded.
 
-## Export quality baseline — September 28, 2026
+## Automatic updates - 0.1.7
 
-Seven new synthetic export tests passed in both the development and bundled
-Python runtimes; all 20 focused export/setup/prompt/focus/vault tests passed
-together. The new export suite is included in Windows CI. No processing or export
-implementation was changed; this establishes a baseline for future improvements.
-
-- All 65,536 channel values survived TIFF save/read and 16-bit ICC conversion
-  exactly, including after ten save/load cycles. 16-bit PNG and grayscale TIFF
-  retained low bits; all eight EXIF orientations retained sample values.
-- Float32 exposure edits stayed within one 16-bit level of a float64 reference
-  at -3, -0.125, +0.125 and +3 stops. Expected black/white clipping was preserved.
-  Preview creation did not modify source pixels; mask TIFFs remained exact.
-  Invalid ICC profiles and unsupported floating-point HDR inputs were rejected.
-- The actual deterministic pipeline produced an exact no-op TIFF and preserved
-  original pixels outside the editing mask. TIFF assets retained 16-bit samples
-  and the sRGB ICC profile; repeated jobs reused hash-verified outputs.
-- Real Photoshop 27.8.0 PSD and PSB exports retained two layers and embedded ICC
-  profiles. Baseline layers and masks had maximum error **1/65535**; merged
-  composites had maximum error **2/65535** against the pipeline TIFFs. Saved masks
-  retained **32,769** distinct levels, matching Photoshop's internal precision.
-  Sources, masks and pre-existing Photoshop documents were preserved. PSB used
-  a forced format threshold on a small fixture, not a new large-file stress test.
-
-Run `python -m unittest tests.test_export_quality` for model-free, Adobe-free
-checks. Run `python -m tests.verify_export_quality` explicitly on a licensed
-Photoshop workstation for real layered exports. The latter leaves synthetic
-artifacts and `outputs/latest-export-quality-verification.json`. It downloads
-nothing and does not reinstall Photo Studio. Perceptual model quality, wider-gamut
-exports and HDR remain separate work; no improvement to those is claimed here.
-
-## Version 0.1.4 — Photo Studio
-
-The simpler product name replaces Luma Atelier. Wide windows again open with the
-familiar navigation sidebar and split chat/controls view; the icon rail remains
-available in narrower views. The 640×480 Windows minimum remains enforced.
-A CI-only test fixture failure caused by an unresolved Windows short temporary
-path was fixed by resolving the fixture root, preserving production validation.
-
-- Rebuilt the redistributable Python backend and NSIS installer. TypeScript/Vite,
-  desktop bridge tests, all 13 focused Python tests, major-editing boundaries and
-  npm audit passed (zero advisories).
-- Repeated the six-size layout matrix, effective 100–200% scaling and separate
-  enlarged-text checks. Native Windows computer-use checks inspected wide,
-  portrait and short layouts, navigation, scrolling and the file dialog.
-  Attempting a smaller window clamped to the 640×480 minimum; the composer and
-  Controls & review switch remained reachable, including the lower controls.
-- Repeated packaged empty-workspace smoke and public-browser isolation checks.
-  Browser bounds passed all six sizes at actual Electron zoom 1, 1.25, 1.5 and 2.
-  Smoke verified synthetic tone/focus output, original preservation, cancellation,
-  review, missing-dependency errors and settings/results after restart with
-  developer Python/Node removed from PATH.
-- Real NSIS 0.1.2 → 0.1.4 upgrade passed with the same uninstall GUID and
-  AppData workspace. Executable and shortcuts used Photo Studio; the original,
-  TIFF output, note and settings hashes matched. The registered uninstaller
-  subsequently removed the application and shortcuts while preserving the data.
-- Windows CI passed for release source commit `2864a77`. Published installer
-  SHA-256 matched GitHub's asset digest. The installer is unsigned.
-- Final clean-reinstall preparation removed 357 validated, exclusively owned
-  model/runtime/cache targets across the development and test workspaces.
-  All 4,537 preservation-manifest file hashes matched afterward. Source, photos,
-  outputs, vaults, notes, credentials and recovery backups remain. Isolated build
-  dependencies remain for maintenance; installed setup only uses its own workspace
-  and cannot reuse them. The application is left uninstalled, and the default
-  workspace has no downloaded setup dependencies. The user's reinstall is pending.
-
-Final local evidence: `.cache/rename-installer-report.json` and
-`.cache/reinstall-final-report.json`. The cleanup inventory and preservation
-manifests remain local and are excluded from Git.
-
-## Version 0.1.3 — Luma Atelier
-
-- TypeScript/Vite build, desktop bridge test, 13 Python unit tests, existing
-  major-editing boundary suite and dependency audit passed (zero advisories).
-- Rendered synthetic layout checks passed at 640×480, 800×600, 1280×720,
-  1920×1080, 900×1400 and 2560×720, with effective viewports representing
-  100%, 125%, 150% and 200% scaling. Separate 125–200% enlarged-text checks
-  passed at 640×480. Fixtures include 24 sessions, long paths/messages, crowded
-  setup and comparison pixels. Checks cover reachable actions/composer,
-  keyboard tab focus, image aspect ratio and absence of document overflow.
-  Representative rendered screenshots were inspected.
-- Packaged public HTTPS browser navigation and isolation passed. Native child
-  bounds matched clipped renderer rectangles across all six window sizes at
-  actual Electron zoom factors 1, 1.25, 1.5 and 2. File/private-network URLs,
-  preload/Node access and tab visibility protections remain enforced.
-- Packaged smoke passed with developer Python/Node removed from the child PATH
-  and a fresh isolated workspace: setup entry, picker, IPC rejection, missing
-  dependencies, synthetic 16-bit tone/focus edits, split/native-pixel review,
-  cancellation, original preservation and settings/results after restart.
-- Packaged SCUNet CUDA denoise and the actual local assistant passed on a
-  synthetic image using retained pinned assets. Prompt correction preserved both
-  versions; real Oh My Pi RPC/tool events, session reopening, worker-lock
-  availability, native Tk review readiness and graceful shutdown passed.
-- Actual NSIS 0.1.2 → 0.1.3 rename upgrade passed. The uninstall GUID stayed
-  unchanged, the old executable/shortcuts were replaced, and the renamed app
-  reopened the same AppData workspace. Synthetic original, TIFF output, note and
-  settings hashes matched; output preview and soft-focus controls worked.
-- Git branch/tag history and commit metadata were inspected. Published history
-  contains no private context Markdown or development-agent commit attribution;
-  a rewrite was unnecessary. The existing five-document allowlist was retained
-  and explicit context exclusions strengthened. Native runtime release retained.
-
-Evidence: .cache/layout-acceptance/report.json and rendered PNGs,
-.cache/desktop-browser-report.json, .cache/desktop-smoke-report.json,
-.cache/desktop-integration-report.json and .cache/rename-installer-report.json.
-Scaling checks exercise effective viewport reflow and enlarged text, plus real
-Electron zoom for browser bounds; they do not replace manual Windows display
-settings and assistive-technology acceptance. The user's fresh reinstall remains
-an independent final acceptance test.
-
-## Version 0.1.2 additions
-
-- Thirteen setup, prompt, vault-reference and focus tests passed. New coverage
-  includes complete setup ordering/failure/cancellation, a single final completion
-  event, inspection-only suggestions, invalid model output, reference provenance,
-  inert Markdown metadata and preservation of existing notes/source bytes.
-- Live Wikimedia Commons search, image download, attribution/hash verification
-  and chooser-to-vault saving passed. Opening a suggested query does not submit it.
-- Real local Qwen3-VL inspection returned editable suggestions for a synthetic
-  image. Suggestions do not submit an editing prompt.
-- Obsidian's pinned official installer passed publisher verification, extraction,
-  executable presence and isolated vault registration. The signature checker now
-  explicitly imports Windows PowerShell's built-in security module, avoiding
-  incompatible modules inherited from another PowerShell installation.
-- Packaged empty-workspace smoke passed, including automatic setup display,
-  synthetic tone/focus edits, cancellation, original preservation and relaunch.
-- Packaged complete setup passed in a fresh workspace using cached downloads,
-  with every pinned hash verified and every component extracted. Runtime,
-  assistant, photo, legacy and Obsidian completed in order; only the final event
-  released setup. After restart, Torch 2.7.1+cu128 detected the RTX 5090. The real
-  Qwen3-VL suggestion UI filled a draft without submission, edits or source changes.
-  Its synthetic screenshot was inspected.
-
-Evidence: .cache/prompt-suggestion-acceptance/report.json,
-.cache/obsidian-setup-acceptance-report.json,
-.cache/complete-setup-acceptance-report.json and the updated smoke report.
-The 0.1.2 checks above were performed on a local build before the 0.1.3 release.
-
-## Passed locally
-
-- Fresh pinned redistributable Python imports, TypeScript/Vite production build,
-  desktop bridge test, and npm audit (zero reported vulnerabilities).
-- Nine setup, prompt-authorization and focus-correction tests. Focus tests cover
-  known mild Gaussian blur, tiled continuity, unchanged flat fields, cancellation,
-  numeric bounds, precision, and unchanged pixels outside the supplied mask.
-- Existing major-editing boundary suite: reconstruction opt-ins, selection/no-op,
-  failed follow-up, no mutation retry, cancellation, profile isolation, Adobe locks.
-- Packaged app in an empty workspace: startup without developer Python/models,
-  file picker, unsupported IPC rejection, actionable missing-model errors,
-  synthetic tone edit and soft-focus operation, 16-bit TIFF, original-byte
-  preservation, embedded split/100% review, safe cancellation, and saved data
-  after shutdown/relaunch.
-- Public HTTPS navigation in the embedded reference browser. Remote pages have
-  no preload, photo bridge or Node integration; sandbox enabled. File/loopback/
-  private-network addresses are rejected and switching tabs hides the view.
-- Actual pinned Torch CUDA download, integrity check and extraction; packaged
-  SCUNet on RTX 5090 32 GB, Torch 2.7.1+cu128. This uses downloaded/reused verified
-  assets in a separate acceptance workspace, not the developer virtualenv.
-- Real Oh My Pi RPC, local Prompt Master spelling correction with both versions
-  saved, real photo_status tool and message events, session reopen with selected
-  input, worker-lock availability, native Tk review readiness, graceful shutdown.
-- Dark/light setup and empty-studio screens inspected visually. Upstream controls
-  are adapted with quieter button styling; this is not pixel-identical coverage
-  of all OpenCode screens.
-- NSIS install to a chosen test directory, desktop shortcut creation, installed
-  app launch, 0.1.0 → 0.1.1 upgrade, and uninstall. Original image, 16-bit output,
-  note and settings hashes remained identical across upgrade and uninstall.
-  Upgraded AppData output preview and soft-focus controls passed. The test install
-  was removed; its test user data is preserved.
-
-Local detailed reports are retained in .cache/desktop-smoke-report.json,
-.cache/desktop-integration-report.json, .cache/desktop-download-acceptance-report.json,
-and .cache/desktop-browser-report.json. Installer evidence is in
-.cache/desktop-installer-report.json. They are intentionally not committed.
-
-## Verification limits
-
-- A clean interactive Windows VM was unavailable. A GitHub Windows runner builds
-  and runs packaged smoke checks; that is not a full clean-machine installer test.
-- Packaged real Adobe editing has not been revalidated in this acceptance run.
-  Existing integration boundaries are retained.
-- Installer signing is not configured. Local installer Authenticode status is
-  NotSigned; generic electron-builder signing log entries do not change that.
-- Soft-focus improvement is tested against known synthetic mild blur. Recovery of
-  real severe defocus, motion blur or missing detail is not promised. Review halos
-  and noise at 100%; choose a smaller radius/strength where appropriate.
-- CUDA inference is tested on RTX 5090 32 GB. Other hardware is unverified;
-  the Mamba native binary specifically requires compute capability 12.0.
-- The browser is for public reference reads, not uploads, downloads or account
-  logins. Browser pages are not automatically supplied to the assistant.
-- Advanced masking/batch/legacy assistant controls still use native panels.
-  Prompt Master applies to desktop conversation submissions, not the legacy panel.
-- Video remains future work.
-
-
-## Bundled creative MCP verification — 0.1.5
-
-- Real initialize/tools-list handshakes passed using the shipped Python and a
-  stripped PATH: Photoshop 1.7.24 (125 tools), Lightroom 0.17.0 (18), Resolve
-  4.8.22 (37). Reports: `.cache/creative-mcp-verification.json`.
-- Six new boundary tests cover archive traversal/links, relocatable config,
-  credential/hook isolation, invalid app names and cancellation of a running
-  inspection. All 14 focused setup/prompt/MCP tests passed; 13 bundled-runtime
-  MCP/export precision tests passed.
-- All 27 responsive layout cases passed, including MCP results and actions,
-  small windows, display scaling and enlarged text. Packaged smoke tests passed
-  with no models or developer tools: photo edits, review, cancellation, preserved
-  originals and settings across restart. Reports remain under `.cache`.
-- Native computer-use inspection confirmed the new Setup cards and a successful
-  Photoshop server check showing 125 tools. Native resize gestures did not change
-  the window in this session; the 27 automated resize checks provide that proof.
-- Packaged payload verification checked 27,100 source files: the only omitted
-  entries were two empty `.gitkeep` placeholders filtered by electron-builder.
-- Host limits: Lightroom correctly reports its MCP plug-in is not connected.
-  Photoshop requires an already-running application and document; its initial
-  connection test exposed upstream automatic launching, so the inspector now
-  checks running state before detection. Live document inspection is unverified.
-  Resolve 20.3.2.9 is installed and was opened to Project Manager without opening
-  or editing projects; a live version query timed out. Runtime-state inspection
-  works, but successful live Resolve editing/export is not claimed.
-- Built `PhotoStudio-0.1.5-x64-Setup.exe` (472,718,394 bytes), unsigned. SHA-256:
-  `05229545d9cc17c857603860982b39567376cb4dd51fae529d00ab51ff783b94`.
-  This build was tested from its unpacked payload; NSIS installation was not
-  rerun, preserving the user's uninstalled state for a clean reinstall.
-
-
-## Spacing and installation verification � 0.1.6
-
-- Composer actions remain on one row with a horizontally scrollable action area
-  and fixed Send. All 27 viewport / scaling / enlarged-text cases pass, including
-  equal pane gutters, card padding, non-collapsed spacing between card contents,
-  reachable actions, keyboard focus, comparison aspect ratio and no page overflow.
-- Native computer-use inspection confirmed the Adobe and MCP cards have separated
-  headings, paragraphs, paths and buttons. Windows system-menu resizing succeeded
-  from the wide view to a compact width, then clamped at the configured minimum
-  width and reflowed settings into one column. Native height resizing also
-  clamped at 480, confirming the 640�480 minimum in both dimensions.
-- Eight setup tests pass: verified/resumable downloads, fresh runtime import path,
-  installer success/error/cancel codes, seed preservation, exclusive repair lock,
-  isolated workspace selection and logs. Together with export, prompt and MCP
-  checks, 24 focused bundled-Python tests pass.
-- The production NSIS customInstall macro was compiled into fixture installers
-  and executed for success, failure, cancellation and missing-runtime cases.
-  Only success reached the completion marker; child arguments retained isolation
-  and silent mode. These fixtures do not install the app or change its registry.
-- Native inspection of the real Tk progress UI with synthetic download events
-  confirmed readable progress and working Cancel (exit 2). No model download was
-  performed by this fixture. The full 34.7 GiB production download and live NSIS
-  installation were not rerun; successful end-to-end full setup is not claimed.
-- Packaged smoke passes with isolated synthetic inputs and stripped PATH: startup,
-  IPC/picker boundaries, 16-bit edits, review, browser restrictions, cancellation,
-  and original/output/settings preservation on restart. The reference browser is
-  now created on demand, avoiding an unused, uninitialized Chromium target during
-  startup. No test-only runtime flag or production debugger hook was added.
-- The installer now gates Finish / Launch on complete component setup. Photoshop,
-  Lightroom Classic, Resolve and GPU drivers remain separately installed.
-- Built unsigned `PhotoStudio-0.1.6-x64-Setup.exe` (474,931,742 bytes).
-  SHA-256: `1273887f057edd6da0cb22aeb4d4573bd4ac377d8d369023d9df6e4e4da1e473`. Built and tested locally; not published or installed
-  into the normal user profile.
+- Five updater tests cover encrypted credential storage, no credential return or
+  error leakage, stable private release configuration, download failure/retry,
+  one operation at a time, and an idle app/backend drain before installer launch.
+- All 27 layout cases pass with the new update card and reachable restart action.
+  Packaged smoke passes with updater startup and rejection of unknown actions.
+- The first GitHub run exposed a temp-directory alias in the MCP environment test;
+  resolving the expected path fixes the assertion while retaining the containment
+  check. All six MCP boundary tests pass locally.
+- CI verifies latest.yml version/size/SHA-512 against the built installer before
+  publishing. Release assets are uploaded to a draft before it becomes latest.
+- Real authenticated upgrade installation is not yet tested. GitHub update access
+  must be connected by the user; no personal or CI token is shipped. Code signing
+  secrets are not configured. Earlier versions require a one-time manual install
+  of 0.1.7 to gain the updater.
