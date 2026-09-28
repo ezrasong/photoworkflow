@@ -24,6 +24,23 @@ path was fixed by resolving the fixture root, preserving production validation.
   Smoke verified synthetic tone/focus output, original preservation, cancellation,
   review, missing-dependency errors and settings/results after restart with
   developer Python/Node removed from PATH.
+- Real NSIS 0.1.2 → 0.1.4 upgrade passed with the same uninstall GUID and
+  AppData workspace. Executable and shortcuts used Photo Studio; the original,
+  TIFF output, note and settings hashes matched. The registered uninstaller
+  subsequently removed the application and shortcuts while preserving the data.
+- Windows CI passed for release source commit `2864a77`. Published installer
+  SHA-256 matched GitHub's asset digest. The installer is unsigned.
+- Final clean-reinstall preparation removed 357 validated, exclusively owned
+  model/runtime/cache targets across the development and test workspaces.
+  All 4,537 preservation-manifest file hashes matched afterward. Source, photos,
+  outputs, vaults, notes, credentials and recovery backups remain. Isolated build
+  dependencies remain for maintenance; installed setup only uses its own workspace
+  and cannot reuse them. The application is left uninstalled, and the default
+  workspace has no downloaded setup dependencies. The user's reinstall is pending.
+
+Final local evidence: `.cache/rename-installer-report.json` and
+`.cache/reinstall-final-report.json`. The cleanup inventory and preservation
+manifests remain local and are excluded from Git.
 
 ## Version 0.1.3 — Luma Atelier
 
