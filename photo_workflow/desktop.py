@@ -22,6 +22,9 @@ def emit(value):
 
 class Desktop:
     def __init__(self):
+        from .installation import seed_workspace, setup_lock
+        with setup_lock():
+            seed_workspace()
         local_runtime()
         from .vault import initialize
         initialize()
@@ -408,7 +411,7 @@ def main():
     try:
         import torch
     except ImportError:
-        pass  # First-run setup installs the optional large CUDA runtime.
+        pass  # Repair remains available for unpacked or interrupted installations.
     desktop=Desktop()
     emit({'event':{'type':'backend_ready','home':str(ROOT)}})
     def handle(request):

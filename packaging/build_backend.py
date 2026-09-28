@@ -36,7 +36,7 @@ def build(native):
         fresh.mkdir(parents=True,exist_ok=True)
         with tarfile.open(archive) as tar:tar.extractall(fresh,filter='data')
     python=fresh/'python/python.exe'
-    # The official wheel brings CUDA/cuDNN DLLs; large wheels are installed by first-run setup.
+    # The official wheel brings CUDA/cuDNN DLLs; large wheels are downloaded during NSIS installation.
     full=(ROOT/'packaging/requirements-hashed.txt').read_text()
     lines=full.splitlines(keepends=True);filtered=[];skip=False
     for line in lines:

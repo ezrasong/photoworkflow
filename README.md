@@ -7,17 +7,22 @@ the assistant, and a Python photo pipeline.
 ## Install and use
 
 Download the Windows x64 installer from this private repository's Releases page.
-Install and launch **Photo Studio** from its shortcut; developer tools are not
-required. First launch opens setup when downloads are missing. Choose
-**Install / repair complete setup** for all models, runtimes, Oh My Pi, Obsidian
-and Photo Vault (about 35 GiB of downloads). Individual components can be repaired.
-The installer itself includes Photoshop, Lightroom Classic and DaVinci Resolve
-MCP servers with private Node/Python dependencies; they need no npm/pip setup.
-Downloads show sizes, check disk space, resume interruption and verify SHA-256.
-Complete setup installs dependencies in order. Restart when setup finishes.
+The installer downloads and verifies **all app-managed components before it
+finishes**: CUDA runtime, photo and assistant models, Oh My Pi, and Obsidian with
+Photo Vault (about 34.7 GiB of downloads; allow 105 GiB free for extraction).
+Progress and Cancel are available during installation. Interrupted downloads are
+kept; rerun the installer to resume. Failed or cancelled setup does not reach Finish.
+Launch **Photo Studio** from its shortcut when installation completes; no separate
+first-launch download or developer tools are required. Settings retains
+**Install / repair complete setup** for recovery and individual component repair.
+The installer also includes Photoshop, Lightroom Classic and DaVinci Resolve
+MCP servers with private Node/Python dependencies. The licensed creative apps
+and NVIDIA driver must already be installed separately.
 
 Windows can be resized down to 640×480. Use the menu for navigation; narrower
 views switch between Conversation and Controls & review. Short views scroll.
+Composer actions stay on one row; scroll the actions horizontally in narrow panes.
+Send stays visible, and Ctrl + Enter sends from the text box.
 
 Create a session, choose a photo/folder, then describe your edit. Manual tone,
 denoise, upscale and restoration controls run directly through Python. Advanced

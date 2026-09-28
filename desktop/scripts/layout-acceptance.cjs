@@ -30,6 +30,37 @@ async function noOverflow(page,label){
  assert.ok(bad.sw<=bad.w+1&&bad.sh<=bad.h+1,label+' document overflow '+JSON.stringify(bad))
 }
 async function reachable(locator){await locator.scrollIntoViewIfNeeded();await locator.focus();assert.ok(await locator.evaluate(e=>{const r=e.getBoundingClientRect();return r.left>=-1&&r.right<=innerWidth+1&&r.top>=-1&&r.bottom<=innerHeight+1}),await locator.textContent())}
+async function composerRow(page,label){
+ const send=page.locator('.composer-send');await reachable(send)
+ const buttons=page.locator('.composer-actions button')
+ for(let i=0;i<await buttons.count();i++){
+  // Focus and browser scrolling must expose every action without moving Send.
+  await buttons.nth(i).scrollIntoViewIfNeeded()
+  const geometry=await buttons.nth(i).evaluate(e=>{
+   const r=e.getBoundingClientRect(),send=document.querySelector('.composer-send').getBoundingClientRect(),actions=document.querySelector('.composer-actions').getBoundingClientRect()
+   return {top:r.top,bottom:r.bottom,sendTop:send.top,sendBottom:send.bottom,sendRight:send.right,width:innerWidth,visible:r.left>=actions.left-1&&r.right<=actions.right+1,nowrap:getComputedStyle(e).whiteSpace}
+  })
+  assert.ok(Math.abs(geometry.top-geometry.sendTop)<=1,label+' footer wrapped '+JSON.stringify(geometry))
+  assert.ok(geometry.sendRight<=geometry.width+1,label+' send clipped')
+  assert.equal(geometry.nowrap,'nowrap')
+  // At extreme enlarged-text widths, an action itself may exceed the viewport;
+  // the action area remains scrollable and both ends must be reachable.
+  if(await buttons.nth(i).evaluate(e=>e.clientWidth<=e.parentElement.clientWidth))assert.ok(geometry.visible,label+' action inaccessible')
+ }
+ await page.locator('.composer-actions').evaluate(e=>e.scrollLeft=0)
+ const gutters=await page.evaluate(()=>['.selection','.messages'].map(s=>parseFloat(getComputedStyle(document.querySelector(s)).paddingLeft)))
+ assert.equal(gutters[0],gutters[1],label+' pane gutters differ')
+}
+async function cardSpacing(page,label){
+ const cards=await page.locator('.setup section').evaluateAll(elements=>elements.map(e=>{
+  const style=getComputedStyle(e),children=[...e.children].filter(c=>c.getBoundingClientRect().height>0)
+  return {padding:parseFloat(style.paddingLeft),gap:parseFloat(style.rowGap),spaces:children.slice(1).map((c,i)=>c.getBoundingClientRect().top-children[i].getBoundingClientRect().bottom)}
+ }))
+ for(const card of cards){
+  assert.ok(card.padding>=12,label+' card padding')
+  assert.ok(card.gap>=12&&card.spaces.every(g=>g>=11),label+' collapsed card content '+JSON.stringify(card))
+ }
+}
 async function studio(page){
  const nav=page.getByRole('button',{name:'Toggle navigation',exact:true});
  if(!await page.getByRole('button',{name:'Studio',exact:true}).isVisible())await nav.click()
@@ -49,13 +80,14 @@ async function details(page){const button=page.getByRole('button',{name:'Control
   const effective=await page.evaluate(()=>[innerWidth,innerHeight]);assert.ok(Math.abs(effective[0]-width/scale)<=2&&Math.abs(effective[1]-height/scale)<=2,label+' effective viewport '+effective);await noOverflow(page,label+' setup');await reachable(page.getByRole('button',{name:'Install / repair complete setup',exact:true}));
   await reachable(page.getByRole('button',{name:'Show workspace',exact:true}));
   await reachable(page.getByRole('button',{name:'Inspect app',exact:true}).last());await page.getByRole('button',{name:'Inspect app',exact:true}).last().click();await page.getByText('App needs attention',{exact:false}).waitFor();await reachable(page.getByRole('button',{name:'Show MCP configuration',exact:true}));await noOverflow(page,label+' MCP results');
+  await cardSpacing(page,label)
   if(scale===1)await page.screenshot({path:path.join(out,label+'-mcp.png')});
   await studio(page)
   await page.getByRole('button',{name:'Choose photo',exact:true}).click()
   if(!await page.getByRole('button',{name:'＋ New session',exact:true}).isVisible())await page.getByRole('button',{name:'Toggle navigation',exact:true}).click()
   await reachable(page.locator('.session-list button').last());await page.getByRole('button',{name:'＋ New session',exact:true}).click()
   await reachable(page.getByLabel('Photo instructions'));await page.getByLabel('Photo instructions').fill('A long instruction '.repeat(100));await reachable(page.getByRole('button',{name:'Send ↑',exact:true}));
-  await noOverflow(page,label+' conversation');await details(page)
+  await composerRow(page,label);await noOverflow(page,label+' conversation');await details(page)
   await page.getByRole('tab',{name:'Photo controls',exact:true}).click();await reachable(page.getByRole('button',{name:'Apply manual operation',exact:true}));await noOverflow(page,label+' controls')
   await page.getByRole('tab',{name:'Results',exact:true}).click();await page.locator('.result-list button').last().click();
   await page.getByAltText('Local before and after photo comparison').waitFor();await settle(page)
@@ -71,8 +103,8 @@ async function details(page){const button=page.getByRole('button',{name:'Control
  for(const textScale of [1.25,1.5,2]){
   await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setContentSize(640,480));await page.reload();await page.getByRole('button',{name:'Install / repair complete setup',exact:true}).waitFor()
   await page.addStyleTag({content:'.app :is(p,button,input,select,textarea,label,summary,small,code,pre,strong,span,h2,h3){font-size:'+14*textScale+'px!important;line-height:1.5!important}'})
-  await reachable(page.getByRole('button',{name:'Install / repair complete setup',exact:true}));await reachable(page.getByRole('button',{name:'Show workspace',exact:true}));await noOverflow(page,'text '+textScale+' setup')
-  await studio(page);await reachable(page.getByLabel('Photo instructions'));await noOverflow(page,'text '+textScale+' conversation');await details(page);await reachable(page.getByRole('button',{name:'Apply manual operation',exact:true}));await noOverflow(page,'text '+textScale+' controls')
+  await reachable(page.getByRole('button',{name:'Install / repair complete setup',exact:true}));await reachable(page.getByRole('button',{name:'Show workspace',exact:true}));await cardSpacing(page,'text '+textScale);await noOverflow(page,'text '+textScale+' setup')
+  await studio(page);await reachable(page.getByLabel('Photo instructions'));await composerRow(page,'text '+textScale);await noOverflow(page,'text '+textScale+' conversation');await details(page);await reachable(page.getByRole('button',{name:'Apply manual operation',exact:true}));await noOverflow(page,'text '+textScale+' controls')
   checks.push('640x480-text-'+textScale);await page.screenshot({path:path.join(out,'text-'+textScale+'.png')})
  }
  assert.deepEqual(errors,[])

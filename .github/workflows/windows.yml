@@ -65,6 +65,9 @@ jobs:
       - name: Packaged application smoke test
         working-directory: desktop
         run: npm run smoke
+      - name: Installer completion gates
+        working-directory: desktop
+        run: npm run test:installer
       - name: Responsive layout acceptance
         working-directory: desktop
         run: npm run test:layout

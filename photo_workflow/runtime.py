@@ -4,12 +4,30 @@ import os
 from pathlib import Path
 import sys
 import uuid
+from contextlib import contextmanager
 
 CODE_ROOT = Path(__file__).resolve().parents[1]
 # Installed code is read-only. The desktop owns a separate persistent workspace.
 ROOT = Path(os.environ.get('PHOTOWORKFLOW_HOME', CODE_ROOT)).resolve()
 PYTHON = Path(sys.executable).resolve()
 PYTHONW = PYTHON.with_name('pythonw.exe') if os.name == 'nt' else PYTHON
+
+
+@contextmanager
+def job_lock(path):
+    """A process-owned Windows lock, released even when the process exits."""
+    import msvcrt
+    with path.open('a+b') as stream:
+        stream.seek(0); stream.write(b'0'); stream.flush(); stream.seek(0)
+        try:
+            msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
+        except OSError as error:
+            raise RuntimeError('This job is already being processed') from error
+        try:
+            yield
+        finally:
+            stream.seek(0)
+            msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
 
 def asset_path(name):
     """Resolve maintained code separately from downloaded runtime/model assets."""

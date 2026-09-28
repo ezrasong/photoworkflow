@@ -1,7 +1,7 @@
 import { app, dialog, ipcMain, shell, nativeImage } from 'electron'
 import { spawn, ChildProcessWithoutNullStreams } from 'node:child_process'
 import { createInterface } from 'node:readline'
-import { randomUUID, createHash } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 import { promises as fs } from 'node:fs'
 import { join, resolve, relative, isAbsolute, extname } from 'node:path'
 import { createWindow, registerRendererProtocol, trusted } from './windows'
@@ -27,19 +27,6 @@ function send(method:string,args:any={}) {
     backend.stdin.write(JSON.stringify({id,method,args})+'\n',error=>{if(error){pending.delete(id);reject(error)}})
   })
 }
-async function seed() {
-  await fs.mkdir(home,{recursive:true})
-  const base=join(resources,'packaging/seed')
-  for(const entry of await fs.readdir(base,{recursive:true,withFileTypes:true})){
-    if(!entry.isFile())continue
-    const source=join(entry.parentPath,entry.name),target=join(home,relative(base,source))
-    await fs.mkdir(join(target,'..'),{recursive:true})
-    const bytes=await fs.readFile(source)
-    const current=await fs.readFile(target).catch(()=>null)
-    if(current && createHash('sha256').update(current).digest('hex')===createHash('sha256').update(bytes).digest('hex'))continue
-    const temp=target+'.seed-'+randomUUID();await fs.writeFile(temp,bytes);await fs.rename(temp,target)
-  }
-}
 async function authorizePath(path:unknown) {
   if(typeof path!=='string'||path.length>32767||path.startsWith('\\\\')||!isAbsolute(path))throw new Error('Choose a local file or folder')
   const actual=await fs.realpath(path)
@@ -53,10 +40,15 @@ async function permitted(path:unknown) {
 }
 function validateCaller(event:Electron.IpcMainInvokeEvent){if(event.sender!==win.webContents||event.senderFrame!==win.webContents.mainFrame||!trusted(event.senderFrame.url))throw new Error('Untrusted renderer')}
 async function start(){
-  await seed()
+  await fs.mkdir(home,{recursive:true})
   registerRendererProtocol();win=createWindow()
-  const browser=referenceBrowser(win)
-  ipcMain.handle('photo:browser',(event,action,args)=>{validateCaller(event);return browser(action,args)})
+  let browser:ReturnType<typeof referenceBrowser>|undefined
+  ipcMain.handle('photo:browser',(event,action,args)=>{
+    validateCaller(event)
+    if(!browser&&action==='hide')return true
+    browser??=referenceBrowser(win)
+    return browser(action,args)
+  })
   const env={...process.env,PHOTOWORKFLOW_HOME:home,PYTHONPATH:resources+';'+join(home,'runtime/python-libs'),PYTHONNOUSERSITE:'1',PYTHONDONTWRITEBYTECODE:'1',PYTHONUTF8:'1'}
   delete (env as any).PYTHONHOME
   backend=spawn(join(resources,'python/python.exe'),['-u','-m','photo_workflow.desktop'],{cwd:resources,env,windowsHide:true,stdio:'pipe'})

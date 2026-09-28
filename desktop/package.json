@@ -1,6 +1,6 @@
 {
   "name": "photo-workflow",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "description": "Private local photo editing, restoration and review",
   "author": "Photo Studio contributors",
@@ -11,7 +11,8 @@
     "test": "node --test tests/*.test.cjs",
     "package": "npm run build && electron-builder --win nsis --x64 --publish never",
     "smoke": "node scripts/smoke.cjs",
-    "test:layout": "node scripts/layout-acceptance.cjs"
+    "test:layout": "node scripts/layout-acceptance.cjs",
+    "test:installer": "node scripts/installer-gates.cjs"
   },
   "dependencies": {
     "electron-window-state": "5.0.3"
@@ -63,7 +64,8 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "deleteAppDataOnUninstall": false
+      "deleteAppDataOnUninstall": false,
+      "include": "resources/installer.nsh"
     },
     "publish": null
   }

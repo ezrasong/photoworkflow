@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 import hashlib
 import json
 from pathlib import Path
@@ -14,22 +13,7 @@ from . import VERSION
 from .imaging import decode_working, stable_read, save_rgb, save_mask, preview
 from .photoshop import write_import
 from .references import write_review, local_path
-from .runtime import ROOT, json_write, sha256, workspace_path, check_cancel
-
-@contextmanager
-def job_lock(path):
-    import msvcrt
-    with path.open('a+b') as stream:
-        stream.seek(0); stream.write(b'0'); stream.flush(); stream.seek(0)
-        try:
-            msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
-        except OSError as error:
-            raise RuntimeError('This job is already being processed') from error
-        try:
-            yield
-        finally:
-            stream.seek(0)
-            msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
+from .runtime import ROOT, json_write, sha256, workspace_path, check_cancel, job_lock
 
 class Pipeline:
     def __init__(self, output=ROOT / 'outputs'):

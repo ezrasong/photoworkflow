@@ -1,9 +1,12 @@
 """Offline setup boundary tests; network responses are deterministic fixtures."""
 import hashlib
 import io
+import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
+import sys
 from unittest.mock import patch
 from types import SimpleNamespace
 
@@ -15,6 +18,73 @@ class Response(io.BytesIO):
     headers={}
 
 class SetupTests(unittest.TestCase):
+    def test_installer_success_failure_cancel_and_logs(self):
+        from scripts.install_desktop import run_setup
+        from photo_workflow import installation as setup
+        data = b'verified fixture'
+        entries = {'models/fixture.bin': {'group': 'runtime', 'bytes': len(data),
+            'url': 'https://fixture.invalid/file', 'sha256': hashlib.sha256(data).hexdigest()}}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            marker = root / 'cancel'
+            with patch.object(setup, 'ROOT', root), patch.object(setup, 'COMPLETE_GROUPS', ('runtime',)), \
+                 patch.object(setup, 'catalog', return_value=entries), patch.object(setup, 'seed_workspace'), \
+                 patch.object(setup.shutil, 'disk_usage', return_value=SimpleNamespace(free=10**12)), \
+                 patch('photo_workflow.vault.initialize'), patch.object(sys, 'path', list(sys.path)):
+                events = []; log = io.StringIO()
+                with patch('urllib.request.urlopen', return_value=Response(data)):
+                    self.assertEqual(run_setup(events.append, marker, log), 0)
+                self.assertEqual((root / 'models/fixture.bin').read_bytes(), data)
+                self.assertEqual(events[-1]['type'], 'setup_complete')
+                self.assertIn(str(root / 'runtime/python-libs'), sys.path)
+                self.assertTrue(json.loads((root / 'desktop/installed-runtime.json').read_text())['verified'])
+                events.clear(); marker.touch()
+                self.assertEqual(run_setup(events.append, marker, log), 2)
+                self.assertFalse(marker.exists())
+                self.assertFalse(any(e['type'] == 'setup_complete' for e in events))
+                self.assertEqual((root / 'models/fixture.bin').read_bytes(), data)
+                events.clear()
+                with patch.object(setup, 'download', side_effect=OSError('offline fixture')):
+                    self.assertEqual(run_setup(events.append, marker, log), 1)
+                self.assertFalse(any(e['type'] == 'setup_complete' for e in events))
+                self.assertIn('offline fixture', log.getvalue())
+
+    def test_seed_preserves_user_files_and_setup_lock_excludes_repairs(self):
+        from photo_workflow import installation as setup
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory).resolve(); root = base / 'workspace'; root.mkdir()
+            seed = base / 'code/packaging/seed/models'; seed.mkdir(parents=True)
+            (seed / 'manifest.json').write_text('new pin')
+            (root / 'models').mkdir(); (root / 'models/manifest.json').write_text('old pin')
+            (root / 'notes.md').write_text('private note')
+            (root / 'photo.tif').write_bytes(b'original')
+            with patch.object(setup, 'ROOT', root), patch.object(setup, 'CODE_ROOT', base / 'code'):
+                with setup.setup_lock():
+                    setup.seed_workspace()
+                    with self.assertRaises(RuntimeError):
+                        setup.install('all', lambda event: None, root / 'cancel')
+                with setup.setup_lock():
+                    setup.seed_workspace()
+            self.assertEqual((root / 'models/manifest.json').read_text(), 'new pin')
+            self.assertEqual((root / 'notes.md').read_text(), 'private note')
+            self.assertEqual((root / 'photo.tif').read_bytes(), b'original')
+            self.assertFalse(list(root.rglob('*.seed-*')))
+
+    def test_installer_bootstrap_uses_selected_workspace_and_silent_exit(self):
+        from scripts import install_desktop as bootstrap
+        from photo_workflow import runtime
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory).resolve()
+            with patch.object(sys, 'argv', ['install_desktop.py', '--silent', '--workspace', str(home)]), \
+                 patch.object(sys, 'path', list(sys.path)), patch.object(sys, 'stdout', sys.stdout), \
+                 patch.object(sys, 'stderr', sys.stderr), patch.dict(os.environ), \
+                 patch.object(runtime, 'local_runtime'), patch.object(bootstrap, 'run_setup', return_value=2) as run:
+                self.assertEqual(bootstrap.main(), 2)
+                self.assertEqual(os.environ['PHOTOWORKFLOW_HOME'], str(home))
+                self.assertEqual(sys.path[1], str(home / 'runtime/python-libs'))
+                self.assertEqual(run.call_args.args[1].parent, home / '.cache/control')
+                self.assertEqual(len(list((home / 'desktop/install-logs').glob('*.log'))), 1)
+
     def test_complete_setup_order_completion_and_failure(self):
         from photo_workflow import installation as setup
         entries={name+'/asset':{'group':name,'bytes':1,'url':'https://fixture.invalid/file','sha256':'0'*64}
@@ -27,6 +97,7 @@ class SetupTests(unittest.TestCase):
             (root/'apps/Obsidian/Obsidian.exe').touch()
             def downloaded(url,target,*args):order.append(target.parent.name)
             with patch.object(setup,'ROOT',root), patch.object(setup,'catalog',return_value=entries), \
+                 patch.object(setup,'seed_workspace'), patch.object(sys,'path',list(sys.path)), \
                  patch.object(setup.shutil,'disk_usage',return_value=SimpleNamespace(free=10**12)), \
                  patch.object(setup,'download',side_effect=downloaded), patch.object(setup,'extract_llama'), \
                  patch('subprocess.run',return_value=SimpleNamespace(returncode=0)), \

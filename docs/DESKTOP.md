@@ -97,12 +97,13 @@ npm test
 npm run package
 npm run smoke
 npm run test:layout
+npm run test:installer
 ```
 
 The bundle uses a fresh hash-pinned Python archive and hash-locked distributions,
 never the developer .venv. Tk, image codecs, native Windows dependencies and VC
 runtime DLLs are included. Large Torch/cu128 wheels, including CUDA DLLs, are
-downloaded/extracted in first-run setup without pip or compilers. The shipped
+downloaded/extracted during NSIS installation without pip or compilers. The shipped
 Mamba binary requires CPython 3.12/Torch 2.7.1/cu128 and compute capability 12.0.
 
 GitHub Actions builds Windows artifacts and checksums. Version tags publish
@@ -110,14 +111,27 @@ installer/checksum assets to private releases. CSC_LINK and CSC_KEY_PASSWORD
 secrets optionally enable signing; absent secrets mean unsigned artifacts.
 Only the release job gets contents:write.
 
-## First launch
+## Installation and first launch
 
-1. Missing downloads open Setup on launch. **Install / repair complete setup**
-   installs the CUDA runtime first, then assistant/vision, photo models, legacy
-   text models, and Obsidian. Photo Vault is initialized and registered with the
-   isolated Obsidian profile. Restart after setup. Individual repair remains
-   available. Setup displays the total download and conservative free-space
-   requirement; large models download after NSIS installation.
+NSIS `customInstall` synchronously runs `scripts/install_desktop.py` with the
+bundled Python in isolated mode. The Tk progress window shows verified downloads
+and extraction with cancellation. Silent NSIS installs pass `--silent` and return
+nonzero on failure (1) or cancellation (2). Finish / Launch requires success;
+logs are saved under `Workspace/desktop/install-logs`. Failed installs retain
+program files and partial downloads for resume/repair; user data is preserved.
+No additional download is scheduled on first launch after successful installation.
+
+The installer and desktop share seed refresh, downloads and a process-owned setup
+lock. Only maintained seed assets are updated. Runtime import paths are refreshed
+before photo model conversion, so a fresh installation needs no intermediate
+restart. All downloads retain HTTPS, pinned size/SHA-256 and resume checks.
+Photoshop, Lightroom Classic, Resolve and GPU drivers remain separately installed.
+
+1. Install all components in order: CUDA runtime, assistant/vision, photo models,
+   legacy text models, then Obsidian. Photo Vault is initialized and registered
+   with its isolated Obsidian profile. Setup estimates 34.7 GiB of downloads and
+   requires 105 GiB free for download/extraction. Settings offers repair if files
+   are later removed or damaged; unpacked development builds still open Setup.
 2. In licensed Lightroom Classic use File → Plug-in Manager → Add at the displayed
    plug-in path. Photoshop uses its existing supported COM registration.
 3. Create a session, select a photo/folder and describe the edit. Manual raster

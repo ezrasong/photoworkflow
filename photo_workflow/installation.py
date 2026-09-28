@@ -4,13 +4,42 @@ import json
 import os
 from pathlib import Path
 import shutil
+import sys
 import urllib.request
+import uuid
 import zipfile
 import zlib
 
-from .runtime import CODE_ROOT, ROOT, json_write, sha256
+from .runtime import CODE_ROOT, ROOT, json_write, sha256, job_lock
 
 COMPLETE_GROUPS = ('runtime', 'assistant', 'photo', 'legacy', 'obsidian')
+
+
+def setup_lock():
+    folder = ROOT / '.cache/control'
+    folder.mkdir(parents=True, exist_ok=True)
+    return job_lock(folder / 'setup.lock')
+
+
+def seed_workspace():
+    """Refresh only maintained assets; never touch user notes, settings or photos.
+
+    Caller holds setup_lock so the desktop and installer cannot seed concurrently.
+    """
+    base = CODE_ROOT / 'packaging/seed'
+    for source in base.rglob('*'):
+        if not source.is_file():
+            continue
+        target = target_path(source.relative_to(base))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if target.is_file() and sha256(target) == sha256(source):
+            continue
+        temporary = target.with_name(target.name + '.seed-' + uuid.uuid4().hex)
+        try:
+            shutil.copyfile(source, temporary)
+            temporary.replace(target)
+        finally:
+            temporary.unlink(missing_ok=True)
 
 
 def catalog():
@@ -109,6 +138,12 @@ def extract_lama(path):
             temp=target.with_name(target.name+'.installing');temp.write_bytes(data);temp.replace(target)
 
 def install(group, emit, marker):
+    with setup_lock():
+        seed_workspace()
+        return _install(group, emit, marker)
+
+
+def _install(group, emit, marker):
     if group == 'all':
         # Runtime precedes LaMa conversion. A group completion must not unlock
         # the desktop while the rest of the setup still owns its job slot.
@@ -121,7 +156,7 @@ def install(group, emit, marker):
             emit(event)
         for name in COMPLETE_GROUPS:
             if marker.exists():raise InterruptedError('Setup paused. Run complete setup again to resume.')
-            install(name, progress, marker)
+            _install(name, progress, marker)
         from .vault import initialize
         initialize()
         if marker.exists():raise InterruptedError('Setup paused')
@@ -138,11 +173,15 @@ def install(group, emit, marker):
         emit({'type':'setup_progress','file':name,'done':0,'total':entry['bytes']})
         download(entry['url'],target,entry['bytes'],entry['sha256'],
                  lambda count:emit({'type':'setup_progress','file':name,'done':count,'total':entry['bytes']}),cancelled)
+        if entry.get('extract'):
+            emit({'type':'setup_extract','file':name})
         if entry.get('extract')=='wheel':extract_wheel(target,cancelled)
         if entry.get('extract')=='lama':extract_lama(target)
     if group=='assistant':extract_llama()
     if group=='runtime':
         import importlib
+        libraries = str(ROOT/'runtime/python-libs')
+        if libraries not in sys.path:sys.path.insert(0, libraries)
         importlib.invalidate_caches()
     if group=='obsidian':
         import subprocess

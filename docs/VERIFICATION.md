@@ -227,3 +227,38 @@ and .cache/desktop-browser-report.json. Installer evidence is in
   `05229545d9cc17c857603860982b39567376cb4dd51fae529d00ab51ff783b94`.
   This build was tested from its unpacked payload; NSIS installation was not
   rerun, preserving the user's uninstalled state for a clean reinstall.
+
+
+## Spacing and installation verification — 0.1.6
+
+- Composer actions remain on one row with a horizontally scrollable action area
+  and fixed Send. All 27 viewport / scaling / enlarged-text cases pass, including
+  equal pane gutters, card padding, non-collapsed spacing between card contents,
+  reachable actions, keyboard focus, comparison aspect ratio and no page overflow.
+- Native computer-use inspection confirmed the Adobe and MCP cards have separated
+  headings, paragraphs, paths and buttons. Windows system-menu resizing succeeded
+  from the wide view to a compact width, then clamped at the configured minimum
+  width and reflowed settings into one column. Native height resizing also
+  clamped at 480, confirming the 640×480 minimum in both dimensions.
+- Eight setup tests pass: verified/resumable downloads, fresh runtime import path,
+  installer success/error/cancel codes, seed preservation, exclusive repair lock,
+  isolated workspace selection and logs. Together with export, prompt and MCP
+  checks, 24 focused bundled-Python tests pass.
+- The production NSIS customInstall macro was compiled into fixture installers
+  and executed for success, failure, cancellation and missing-runtime cases.
+  Only success reached the completion marker; child arguments retained isolation
+  and silent mode. These fixtures do not install the app or change its registry.
+- Native inspection of the real Tk progress UI with synthetic download events
+  confirmed readable progress and working Cancel (exit 2). No model download was
+  performed by this fixture. The full 34.7 GiB production download and live NSIS
+  installation were not rerun; successful end-to-end full setup is not claimed.
+- Packaged smoke passes with isolated synthetic inputs and stripped PATH: startup,
+  IPC/picker boundaries, 16-bit edits, review, browser restrictions, cancellation,
+  and original/output/settings preservation on restart. The reference browser is
+  now created on demand, avoiding an unused, uninitialized Chromium target during
+  startup. No test-only runtime flag or production debugger hook was added.
+- The installer now gates Finish / Launch on complete component setup. Photoshop,
+  Lightroom Classic, Resolve and GPU drivers remain separately installed.
+- Built unsigned `PhotoStudio-0.1.6-x64-Setup.exe` (474,931,742 bytes).
+  SHA-256: `1273887f057edd6da0cb22aeb4d4573bd4ac377d8d369023d9df6e4e4da1e473`. Built and tested locally; not published or installed
+  into the normal user profile.
