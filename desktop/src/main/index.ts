@@ -7,6 +7,9 @@ import { join, resolve, relative, isAbsolute, extname } from 'node:path'
 import { createWindow, registerRendererProtocol, trusted } from './windows'
 import { referenceBrowser } from './browser'
 
+// Retain the established profile and workspace across the display-name change.
+app.setPath('userData', join(app.getPath('appData'), 'photo-workflow'))
+
 let win:ReturnType<typeof createWindow>
 let backend:ChildProcessWithoutNullStreams
 let closing=false
@@ -15,11 +18,11 @@ const selected=new Set<string>()
 const pending=new Map<string,{resolve:(value:any)=>void,reject:(error:Error)=>void}>()
 const resources=app.isPackaged?join(process.resourcesPath,'backend'):resolve(__dirname,'../../../.cache/packaging/bundle')
 let home=process.env.PHOTOWORKFLOW_HOME || join(app.getPath('userData'),'Workspace')
-const allowed=new Set(['status','results','cancel','setup','session','prompt','select','process','export','panel','person','settings','review','obsidian','references'])
+const allowed=new Set(['status','results','cancel','setup','session','prompt','suggest','select','process','export','panel','person','settings','review','obsidian','references'])
 function inside(base:string,path:string){const r=relative(resolve(base),resolve(path));return !r.startsWith('..')&&!isAbsolute(r)}
 function send(method:string,args:any={}) {
   return new Promise<any>((resolve,reject)=>{
-    if(!backend || backend.exitCode!==null){reject(new Error('Photo backend is unavailable. Restart Photo Workflow.'));return}
+    if(!backend || backend.exitCode!==null){reject(new Error('Photo backend is unavailable. Restart Luma Atelier.'));return}
     const id=randomUUID();pending.set(id,{resolve,reject})
     backend.stdin.write(JSON.stringify({id,method,args})+'\n',error=>{if(error){pending.delete(id);reject(error)}})
   })
@@ -82,12 +85,12 @@ async function start(){
     if(method==='select'){if(!Array.isArray(args.paths)||args.paths.length>4)throw new Error('Invalid selection');args.paths=await Promise.all(args.paths.map(permitted))}
     if(method==='process')args.source=await permitted(args.source)
     if(method==='export'||method==='review')args.path=await permitted(args.path)
-    if(['process','setup','prompt','export'].includes(method))busy=true
+    if(['process','setup','prompt','export','suggest','references'].includes(method))busy=true
     try{
       const result=await send(method,args)
       if(method==='session'&&result.source)await authorizePath(result.source)
       return result
-    }catch(error){if(method==='prompt')busy=false;throw error}finally{if(['process','setup','export'].includes(method))busy=false}
+    }catch(error){if(method==='prompt')busy=false;throw error}finally{if(['process','setup','export','suggest','references'].includes(method))busy=false}
   })
   ipcMain.handle('photo:pick',async(event,kind)=>{
     validateCaller(event)
@@ -121,5 +124,5 @@ async function start(){
   })
 }
 if(!app.requestSingleInstanceLock())app.quit()
-else {app.on('second-instance',()=>{win?.show();win?.focus()});void app.whenReady().then(start).catch(error=>{dialog.showErrorBox('Photo Workflow startup failed',String(error));app.quit()})}
+else {app.on('second-instance',()=>{win?.show();win?.focus()});void app.whenReady().then(start).catch(error=>{dialog.showErrorBox('Luma Atelier startup failed',String(error));app.quit()})}
 app.on('window-all-closed',()=>app.quit())

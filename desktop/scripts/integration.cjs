@@ -4,7 +4,7 @@ const fs=require('node:fs/promises')
 const {resolve,join}=require('node:path')
 const {execFileSync}=require('node:child_process')
 const assert=require('node:assert/strict')
-const root=resolve(__dirname,'../..'),exe=resolve(__dirname,'../dist/win-unpacked/Photo Workflow.exe')
+const root=resolve(__dirname,'../..'),exe=resolve(__dirname,'../dist/win-unpacked/Luma Atelier.exe')
 const home=join(root,'.cache/desktop-gpu-acceptance')
 const resources=resolve(exe,'../resources/backend')
 let app,page

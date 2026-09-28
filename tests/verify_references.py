@@ -31,7 +31,12 @@ def verify():
     with patch('photo_workflow.reference_browser.search',side_effect=AssertionError('Automatic query submission')):
         ui=Browser(root,target,'private example that must not be sent');root.withdraw();root.update()
         ui.selected=[str(path)];ui.done()
-    assert json.loads(target.read_text())==[str(path)];target.unlink()
+    selection=json.loads(target.read_text())
+    assert selection['references']==[str(path)] and len(selection['notes'])==1
+    from pathlib import Path
+    note=Path(selection['notes'][0])
+    assert note.is_file() and provenance['sha256'] in note.read_text(encoding='utf-8')
+    target.unlink()
     json_write(ROOT/'outputs/latest-reference-verification.json',{'status':'passed','provider':'Wikimedia Commons',
         'explicit_query':'snowy mountain landscape photograph','selected':str(path),'provenance':provenance,
         'no_automatic_submission':True,'private_address_rejection':True,'local_photo_or_note_uploaded':False})

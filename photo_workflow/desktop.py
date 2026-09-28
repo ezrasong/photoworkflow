@@ -51,7 +51,7 @@ class Desktop:
                 prop = torch.cuda.get_device_properties(0)
                 gpu.update(name=prop.name, memory=prop.total_memory, capability=list(torch.cuda.get_device_capability(0)))
             else: gpu['reason'] = 'A supported NVIDIA GPU and driver are required for model inference; CPU fallback is not configured.'
-        except ImportError: gpu['reason'] = 'Install the PyTorch CUDA runtime in Setup, then restart Photo Workflow to detect supported hardware.'
+        except ImportError: gpu['reason'] = 'Install the PyTorch CUDA runtime in Setup, then restart Luma Atelier to detect supported hardware.'
         except Exception as error: gpu['reason'] = str(error)
         adobe = {}
         for product, exe in [('Photoshop', 'Photoshop.exe'), ('Lightroom', 'Lightroom.exe')]:
@@ -253,9 +253,30 @@ class Desktop:
             from .vault import open_obsidian
             open_obsidian();return {'opened':True}
         if method=='references':
-            if self.busy or not self.workspace:raise ValueError('Open an idle assistant session first')
             from .chat import choose_references
-            return choose_references(self.workspace, '')
+            with self.guard:
+                if self.busy or not self.workspace:raise ValueError('Open an idle assistant session first')
+                self.busy=True
+            try:
+                result=choose_references(self.workspace, '')
+                self.save_workspace()
+                return result
+            finally:
+                with self.guard:self.busy=False
+        if method=='suggest':
+            with self.guard:
+                if self.busy or not self.broker:raise ValueError('Open an idle assistant session first')
+                if not self.workspace.selected_input:raise ValueError('Choose a photo first')
+                self.busy=True
+                self.cancel_file=ROOT/'.cache/control'/(uuid.uuid4().hex+'.cancel')
+            try:
+                from .prompt_master import suggest
+                result=suggest(self.workspace,self.broker.inference_lock,self.cancel_file)
+                self.record({'type':'prompt_suggestions',**result})
+                return result
+            finally:
+                with self.guard:
+                    self.cancel_file.unlink(missing_ok=True);self.cancel_file=None;self.busy=False
         if method=='cancel': return self.cancel()
         if method=='setup':
             from .installation import install

@@ -37,7 +37,7 @@ jobs:
       - name: Setup boundary tests
         run: python -m unittest tests.test_desktop_installation
       - name: Prompt authorization tests
-        run: .cache/packaging/bundle/python/python.exe -m unittest tests.test_prompt_master tests.test_focus
+        run: .cache/packaging/bundle/python/python.exe -m unittest tests.test_prompt_master tests.test_focus tests.test_vault_references
       - name: Install locked desktop dependencies
         working-directory: desktop
         run: npm ci
@@ -58,6 +58,9 @@ jobs:
       - name: Packaged application smoke test
         working-directory: desktop
         run: npm run smoke
+      - name: Responsive layout acceptance
+        working-directory: desktop
+        run: npm run test:layout
       - name: Installer checksums
         shell: pwsh
         run: |
@@ -67,7 +70,7 @@ jobs:
           }
       - uses: actions/upload-artifact@v4
         with:
-          name: PhotoWorkflow-windows-x64
+          name: LumaAtelier-windows-x64
           path: |
             desktop/dist/*Setup.exe
             desktop/dist/*.sha256
@@ -82,11 +85,15 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: PhotoWorkflow-windows-x64
+          name: LumaAtelier-windows-x64
           path: artifacts
       - name: Publish versioned installer
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "Photo Workflow $GITHUB_REF_NAME" --notes "Windows x64 photo desktop. See verification and limitations in the repository. Signing is available only when configured; check the downloaded executable signature."
-          find artifacts -type f \( -name '*Setup.exe' -o -name '*.sha256' \) -exec gh release upload "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" {} +
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release already published; preserving its installer and checksum."
+          else
+            gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "Luma Atelier $GITHUB_REF_NAME" --notes "Windows x64 photo desktop. See verification and limitations in the repository. Signing is available only when configured; check the downloaded executable signature."
+            find artifacts -type f \( -name '*Setup.exe' -o -name '*.sha256' \) -exec gh release upload "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" {} +
+          fi

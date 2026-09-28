@@ -445,9 +445,15 @@ def choose_references(workspace, query):
         subprocess.run([sys.executable,'-m','photo_workflow.reference_browser','--output',str(target),'--query',query],
                        cwd=ROOT,stdin=subprocess.DEVNULL,check=True,creationflags=subprocess.CREATE_NO_WINDOW)
         selected=json.loads(target.read_text())
+        notes=[]
+        if isinstance(selected,dict):
+            if selected.get('cancelled'):return {'cancelled':True,'selected_references':len(workspace.references)}
+            notes=selected.get('notes',[])
+            selected=selected.get('references')
         if not isinstance(selected,list) or len(selected)>3:raise ValueError('Select up to three references')
         workspace.select_references(selected)
         return {'selected_references':len(workspace.references),'use':'Local visual comparison only; not inputs to the upscaler',
+                'saved_vault_notes':notes,
                 'search_submission':'User-controlled in the local chooser'}
     finally:target.unlink(missing_ok=True)
 

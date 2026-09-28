@@ -33,7 +33,7 @@ __pycache__/
 *.tar.gz
 # Retain local research/handoffs on disk, but ignore Markdown by default.
 *.md
-!README.md
+!/README.md
 !desktop/UPSTREAM.md
 !docs/DESKTOP.md
 !docs/CAPABILITIES.md
@@ -45,3 +45,10 @@ docs/*
 !packaging/seed/**/*.md
 package-lock.json
 !desktop/package-lock.json
+
+# Local agent context stays private, including inside otherwise retained asset trees.
+AGENTS.md
+CLAUDE.md
+HANDOFF*.md
+NEW_CHAT*.md
+CONTINUATION*.md

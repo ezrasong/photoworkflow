@@ -186,7 +186,7 @@ def connect_lightroom():
         check_cancel()
         try: return lightroom.request('catalog', timeout=5)
         except TimeoutError: pass
-    raise TimeoutError('Lightroom started but the bridge is unavailable. Finish any startup dialog and enable Local Photo Workflow.')
+    raise TimeoutError('Lightroom started but the bridge is unavailable. Finish any startup dialog and enable Luma Atelier.')
 
 
 def copy_render(result, destination):
@@ -275,7 +275,7 @@ def run(path, prompt, psd=True, output=None, unified=False, context=None):
             check_cancel()
             catalog_info = connect_lightroom()
             if catalog_info.get('bridge_version', 0) < 4:
-                raise RuntimeError('Reload Local Photo Workflow in Lightroom Plug-in Manager for camera metadata and HEIC support')
+                raise RuntimeError('Reload Luma Atelier in Lightroom Plug-in Manager for camera metadata and HEIC support')
             catalog = local_path(catalog_info['catalog'])
             report['catalog'] = str(catalog)
             photoshop_session = None

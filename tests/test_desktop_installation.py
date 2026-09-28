@@ -5,6 +5,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
+from types import SimpleNamespace
 
 from photo_workflow.installation import download
 
@@ -14,6 +15,40 @@ class Response(io.BytesIO):
     headers={}
 
 class SetupTests(unittest.TestCase):
+    def test_complete_setup_order_completion_and_failure(self):
+        from photo_workflow import installation as setup
+        entries={name+'/asset':{'group':name,'bytes':1,'url':'https://fixture.invalid/file','sha256':'0'*64}
+                 for name in ('runtime','assistant','photo','legacy','obsidian')}
+        events=[];order=[]
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);marker=root/'cancel'
+            # All orchestration is real; network, archive and platform boundaries are fixtures.
+            (root/'apps/Obsidian').mkdir(parents=True)
+            (root/'apps/Obsidian/Obsidian.exe').touch()
+            def downloaded(url,target,*args):order.append(target.parent.name)
+            with patch.object(setup,'ROOT',root), patch.object(setup,'catalog',return_value=entries), \
+                 patch.object(setup.shutil,'disk_usage',return_value=SimpleNamespace(free=10**12)), \
+                 patch.object(setup,'download',side_effect=downloaded), patch.object(setup,'extract_llama'), \
+                 patch('subprocess.run',return_value=SimpleNamespace(returncode=0)), \
+                 patch('subprocess.CREATE_NO_WINDOW',0,create=True), patch('photo_workflow.vault.initialize') as vault:
+                result=setup.install('all',events.append,marker)
+                self.assertEqual(order,list(setup.COMPLETE_GROUPS))
+                self.assertTrue(result['restartRecommended'])
+                self.assertEqual([e['group'] for e in events if e['type']=='setup_complete'],['all'])
+                self.assertEqual(len([e for e in events if e['type']=='setup_group_complete']),5)
+                vault.assert_called()
+                events.clear();order.clear()
+                def fail(url,target,*args):
+                    order.append(target.parent.name)
+                    if target.parent.name=='photo':raise ValueError('fixture failure')
+                with patch.object(setup,'download',side_effect=fail):
+                    with self.assertRaisesRegex(ValueError,'fixture failure'):setup.install('all',events.append,marker)
+                self.assertEqual(order,['runtime','assistant','photo'])
+                self.assertFalse(any(e['type']=='setup_complete' for e in events))
+                events.clear();marker.touch()
+                with self.assertRaises(InterruptedError):setup.install('all',events.append,marker)
+                self.assertEqual(events,[])
+
     def test_interruption_resumes_and_preserves_existing(self):
         data=b'original fixture';digest=hashlib.sha256(data).hexdigest()
         with tempfile.TemporaryDirectory() as directory:

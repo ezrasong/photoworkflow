@@ -19,14 +19,16 @@ Advanced panels use the same packaged Python and persistent workspace.
 | Photoshop local curves/clone, layered TIFF/PSD/PSB | Conversation; Results export | photoshop_local, photoshop |
 | Before/after split, Fit/100%, pan, navigation, What changed | Embedded Results tab; native review retained for advanced workflows | photo-review, imaging, review_panel |
 | Automatic local prompt correction, original/corrected history | Composer and Prompt Master tab | prompt_master, chat authorization boundary |
+| Photo-based prompt suggestions; editable drafts before submission | Suggest prompts from photo; Prompt Master tab | prompt_master, vision |
 | Public website reference browsing | Embedded Browser tab | Isolated Electron WebContentsView |
 | HEIC/HEIF SDR preparation; RAW/DNG | Assistant selection | heif, native_batch |
 | Local references and selected vault notes | Composer context buttons | references, vault, chat |
 | Explicit Commons search with attribution | Search references opens local chooser; query sent only on Search | reference_browser, public_references |
+| Chosen reference images, source links, licenses and hashes in Obsidian | Save chosen references in Photo Vault in chooser | vault, reference_browser |
 | Person mapping, notes, Photo Vault, optional Obsidian | Precision tools & vault; Setup | vault |
 | Recipe load/recompute, legacy text-only assistant | Precision editor | edit_panel, agent |
 | Cancellation, atomic outputs, original/Adobe preservation | Stop safely; safe close; workers | runtime, pipeline, Adobe guards |
-| Downloads, integrity, interruption recovery | Setup → Install / repair | installation |
+| All models, runtimes, Oh My Pi, Obsidian and vault; per-component repair | Setup → Install / repair complete setup | installation |
 
 Native panels intentionally preserve precision behavior. Visual consolidation
 into Solid can follow later. No video controls are presented.

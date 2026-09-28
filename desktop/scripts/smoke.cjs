@@ -5,18 +5,19 @@ const { execFileSync } = require('node:child_process')
 const assert = require('node:assert/strict')
 const { createHash } = require('node:crypto')
 const root=resolve(__dirname,'../..')
-const exe=process.env.PHOTO_TEST_EXE||resolve(__dirname,'../dist/win-unpacked/Photo Workflow.exe')
+const exe=process.env.PHOTO_TEST_EXE||resolve(__dirname,'../dist/win-unpacked/Luma Atelier.exe')
 const resources=join(exe,'../resources/backend')
 const home=join(root,'.cache/desktop-smoke-'+Date.now())
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex')
 let app
 async function launch(){
-  const env={...process.env,PHOTOWORKFLOW_HOME:home};delete env.ELECTRON_RUN_AS_NODE
+  const env={...process.env,PHOTOWORKFLOW_HOME:home,PATH:process.env.SystemRoot+'\\System32;'+process.env.SystemRoot};for(const key of ['ELECTRON_RUN_AS_NODE','PYTHONHOME','PYTHONPATH','VIRTUAL_ENV','CUDA_PATH'])delete env[key]
   app=await electron.launch({executablePath:exe,env,timeout:60000})
   console.log('Electron launched')
   app.process().stderr.on('data',data=>console.log(String(data).slice(0,1000)))
   const page=await app.firstWindow();await page.waitForLoadState('domcontentloaded')
   page.on('pageerror',error=>console.log('Renderer error',error))
+  await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setContentSize(1440,960))
   console.log('Window loaded',await page.title())
   await page.waitForFunction(()=>!!window.photo)
   return page
@@ -37,6 +38,10 @@ async function close(){
   assert.equal(state.home.toLowerCase(),home.toLowerCase());assert.equal(state.gpu.available,false)
   evidence.checks.push('Packaged Python starts without developer Python, CUDA runtime or models')
   assert.ok(state.dependencies.some(x=>x.group==='runtime'&&x.missingBytes>0))
+  await page.getByRole('button',{name:'Install / repair complete setup',exact:true}).waitFor()
+  evidence.checks.push('First launch opens complete setup with all runtime, model and Obsidian groups')
+  await page.getByRole('button',{name:'Toggle navigation',exact:true}).click()
+  await page.getByRole('button',{name:'Studio',exact:true}).click()
   await app.evaluate(({dialog},fixture)=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:[fixture]})},fixture)
   await page.getByRole('button',{name:'Choose photo',exact:true}).click()
   await page.waitForFunction(()=>document.body.textContent.includes('synthetic.png'))

@@ -19,6 +19,17 @@ cannot authorize reconstruction, path selection or expanded scope. Invalid or
 cancelled corrections send no editing request; the composer retains the original.
 The existing advanced native panel's legacy assistant is a separate workflow.
 
+**Suggest prompts from photo** uses the same pinned local Qwen3-VL reviewer on the
+selected source and references. It returns validated suggestion drafts in Prompt
+Master. **Use as draft** fills the composer; only **Send** submits a request.
+Suggestions are stored with the session and source path, and grant no permission
+to edit. Reference search remains an explicit public query in the local chooser.
+**Save chosen references in Photo Vault** archives selected images, attribution,
+source links and SHA-256 provenance into new notes under References/Collected.
+Closing the chooser cancels selection and saving. Existing notes are preserved.
+References support comparison and repair planning; they do not condition the
+restoration models or establish factual missing detail.
+
 Before/after review decodes through the existing color-managed backend, displays
 8-bit sRGB PNGs in fit or native-pixel mode, and preserves full-precision TIFFs.
 The existing image-size/decoder limits and 512 MiB preview source limit apply.
@@ -43,6 +54,24 @@ Upgrades refresh maintained seed assets, never user notes/settings/photos/result
 NSIS is per-user and preserves app data on uninstall. No service, firewall rule,
 driver or CUDA toolkit is installed.
 
+## Window sizing and upgrade identity
+
+Luma Atelier supports a 640×480 minimum window in Windows device-independent
+pixels. This leaves room for native window controls and a usable scrolling pane.
+Available width selects split panes or Conversation / Controls & review; height
+controls scrolling independently. Navigation can be opened with the menu button.
+Setup, messages, controls and review have their own scroll areas. Long paths are
+available as tooltips; tabs wrap and retain keyboard focus. At high scaling in a
+small window, scroll to reach actions and photo pixels. Native dialogs retain
+Windows keyboard and sizing behavior.
+
+The product, executable, installer and shortcuts use Luma Atelier. Compatibility
+identifiers deliberately remain `photo-workflow`, `local.photoworkflow.desktop`,
+`PHOTOWORKFLOW_HOME`, `photo:` and the Lightroom bridge identifier/path. Electron
+explicitly retains `%APPDATA%/photo-workflow`, including its Workspace and saved
+window state. NSIS retains its upgrade/uninstall identity. No data copy or rename
+is necessary; existing user notes are never rewritten for branding.
+
 ## Build
 
 Use Node 22, Python 3.12+ and uv 0.12.13 on Windows x64. Download
@@ -59,6 +88,7 @@ npm run build
 npm test
 npm run package
 npm run smoke
+npm run test:layout
 ```
 
 The bundle uses a fresh hash-pinned Python archive and hash-locked distributions,
@@ -74,13 +104,17 @@ Only the release job gets contents:write.
 
 ## First launch
 
-1. Setup shows sizes and disk space. Install CUDA runtime before photo models
-   and/or assistant. Restart after runtime installation.
+1. Missing downloads open Setup on launch. **Install / repair complete setup**
+   installs the CUDA runtime first, then assistant/vision, photo models, legacy
+   text models, and Obsidian. Photo Vault is initialized and registered with the
+   isolated Obsidian profile. Restart after setup. Individual repair remains
+   available. Setup displays the total download and conservative free-space
+   requirement; large models download after NSIS installation.
 2. In licensed Lightroom Classic use File → Plug-in Manager → Add at the displayed
    plug-in path. Photoshop uses its existing supported COM registration.
 3. Create a session, select a photo/folder and describe the edit. Manual raster
    controls also work without Adobe. Advanced panels retain precision features.
-4. Review locally. Optional Obsidian setup uses its official signed release;
+4. Review locally. Obsidian setup uses its official signed release;
    vault notes remain ordinary local files.
 
 Interrupted downloads retain a partial file, resume with Range or restart when

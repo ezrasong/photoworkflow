@@ -41,7 +41,10 @@ export function referenceBrowser(win:BrowserWindow) {
     else if(action==='forward'&&contents.navigationHistory.canGoForward())contents.navigationHistory.goForward()
     else if(action==='reload')contents.reload()
     else if(action==='bounds'){
-      const {x,y,width,height}=args
+      // Renderer rectangles are CSS pixels; native child bounds are device-independent pixels.
+      if(!['x','y','width','height'].every(key=>Number.isFinite(args[key])))throw new Error('Invalid browser bounds')
+      const zoom=win.webContents.getZoomFactor()
+      const {x,y,width,height}=Object.fromEntries(['x','y','width','height'].map(key=>[key,args[key]*zoom]))
       if(![x,y,width,height].every(Number.isFinite))throw new Error('Invalid browser bounds')
       const [w,h]=win.getContentSize()
       if(x<0||y<0||width<1||height<1||x+width>w+1||y+height>h+1)throw new Error('Browser bounds must fit the window')

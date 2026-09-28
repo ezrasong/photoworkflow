@@ -1,16 +1,17 @@
 {
   "name": "photo-workflow",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "private": true,
-  "description": "Local photo editing with Oh My Pi",
-  "author": "Photo Workflow contributors",
+  "description": "Private local photo editing, restoration and review",
+  "author": "Luma Atelier contributors",
   "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "tsc --noEmit && electron-vite build",
     "test": "node --test tests/*.test.cjs",
     "package": "npm run build && electron-builder --win nsis --x64 --publish never",
-    "smoke": "node scripts/smoke.cjs"
+    "smoke": "node scripts/smoke.cjs",
+    "test:layout": "node scripts/layout-acceptance.cjs"
   },
   "dependencies": {
     "electron-window-state": "5.0.3"
@@ -29,8 +30,8 @@
   },
   "build": {
     "appId": "local.photoworkflow.desktop",
-    "productName": "Photo Workflow",
-    "artifactName": "PhotoWorkflow-${version}-${arch}-Setup.${ext}",
+    "productName": "Luma Atelier",
+    "artifactName": "LumaAtelier-${version}-${arch}-Setup.${ext}",
     "directories": {
       "output": "dist"
     },

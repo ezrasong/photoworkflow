@@ -1,15 +1,21 @@
-# Photo Workflow
+# Luma Atelier
 
-A local Windows photo desktop adapted from OpenCode's actual Electron/Solid source,
-with Oh My Pi as the assistant and the existing Python photo pipeline as the editor.
+A private, local Windows photo studio for editing, restoration and before/after
+review. Built with Electron/Solid components adapted from OpenCode, Oh My Pi as
+the assistant, and a Python photo pipeline.
 
 ## Install and use
 
 Download the Windows x64 installer from this private repository's Releases page.
-Install and launch **Photo Workflow** from its shortcut; developer tools are not
-required. Open **Setup & settings** to download the runtime and models you need.
+Install and launch **Luma Atelier** from its shortcut; developer tools are not
+required. First launch opens setup when downloads are missing. Choose
+**Install / repair complete setup** for all models, runtimes, Oh My Pi, Obsidian
+and Photo Vault (about 35 GiB of downloads). Individual components can be repaired.
 Downloads show sizes, check disk space, resume interruption and verify SHA-256.
-Install the CUDA runtime first and restart before installing photo models.
+Complete setup installs dependencies in order. Restart when setup finishes.
+
+Windows can be resized down to 640×480. Use the menu for navigation; narrower
+views switch between Conversation and Controls & review. Short views scroll.
 
 Create a session, choose a photo/folder, then describe your edit. Manual tone,
 denoise, upscale and restoration controls run directly through Python. Advanced
@@ -19,6 +25,11 @@ in the embedded before/after tab, including native-pixel view and panning.
 Every desktop conversation prompt passes through local Prompt Master correction;
 original and corrected text remain visible. The original controls permissions.
 A separate in-app reference browser is available beside the conversation.
+Choose **Suggest prompts from photo** for local vision suggestions, then **Use as
+draft** to review one before sending. **Search references** opens public image
+search; only the query you submit goes online. The chooser can save selected
+references with attribution and provenance in Obsidian. References guide comparison
+and repair planning; the current models do not reconstruct pixels from references.
 For mildly out-of-focus photos choose **Correct soft focus**, adjust blur radius
 and correction strength, and compare at 100%. Local deconvolution can improve
 recoverable softness; it cannot reliably recover severe defocus or motion blur.
@@ -44,7 +55,7 @@ processing; installation and explicit reference retrieval are separate operation
 - Supported SDR HEIF preparation preserves decoded samples, but unsupported HDR,
   gain maps, auxiliary data or unknown color can be rejected. RAW development uses
   Lightroom. Dimension, model-memory and regional-edit limits remain enforced.
-- Optional Obsidian is downloaded from its official signed release. Vault files
+- Obsidian is included in complete setup using its official signed release. Vault files
   remain plain local Markdown. No Sync, Publish or community plug-ins are configured.
 - Video editing is a future phase; this release exposes photo operations only.
 

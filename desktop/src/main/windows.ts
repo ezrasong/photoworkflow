@@ -33,7 +33,7 @@ export function registerRendererProtocol() {
 export function createWindow() {
   const state=windowState({defaultWidth:1440,defaultHeight:960})
   const win=new BrowserWindow({x:state.x,y:state.y,width:state.width,height:state.height,
-    minWidth:1100,minHeight:650,show:false,autoHideMenuBar:true,title:'Photo Workflow',backgroundColor:'#101010',
+    minWidth:640,minHeight:480,show:false,autoHideMenuBar:true,title:'Luma Atelier',backgroundColor:'#101010',
     titleBarStyle:'hidden',titleBarOverlay:{color:'#101010',symbolColor:'#eeeeee',height:40},
     webPreferences:{preload:join(__dirname,'../preload/index.js'),contextIsolation:true,nodeIntegration:false,sandbox:true}})
   win.webContents.session.setPermissionRequestHandler((_wc,_p,cb)=>cb(false))

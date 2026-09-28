@@ -3,6 +3,74 @@
 Windows x64 verification, September 27–28, 2026. Tests used synthetic images;
 private photographs and notes were not uploaded.
 
+## Version 0.1.3 — Luma Atelier
+
+- TypeScript/Vite build, desktop bridge test, 13 Python unit tests, existing
+  major-editing boundary suite and dependency audit passed (zero advisories).
+- Rendered synthetic layout checks passed at 640×480, 800×600, 1280×720,
+  1920×1080, 900×1400 and 2560×720, with effective viewports representing
+  100%, 125%, 150% and 200% scaling. Separate 125–200% enlarged-text checks
+  passed at 640×480. Fixtures include 24 sessions, long paths/messages, crowded
+  setup and comparison pixels. Checks cover reachable actions/composer,
+  keyboard tab focus, image aspect ratio and absence of document overflow.
+  Representative rendered screenshots were inspected.
+- Packaged public HTTPS browser navigation and isolation passed. Native child
+  bounds matched clipped renderer rectangles across all six window sizes at
+  actual Electron zoom factors 1, 1.25, 1.5 and 2. File/private-network URLs,
+  preload/Node access and tab visibility protections remain enforced.
+- Packaged smoke passed with developer Python/Node removed from the child PATH
+  and a fresh isolated workspace: setup entry, picker, IPC rejection, missing
+  dependencies, synthetic 16-bit tone/focus edits, split/native-pixel review,
+  cancellation, original preservation and settings/results after restart.
+- Packaged SCUNet CUDA denoise and the actual local assistant passed on a
+  synthetic image using retained pinned assets. Prompt correction preserved both
+  versions; real Oh My Pi RPC/tool events, session reopening, worker-lock
+  availability, native Tk review readiness and graceful shutdown passed.
+- Actual NSIS 0.1.2 → 0.1.3 rename upgrade passed. The uninstall GUID stayed
+  unchanged, the old executable/shortcuts were replaced, and the renamed app
+  reopened the same AppData workspace. Synthetic original, TIFF output, note and
+  settings hashes matched; output preview and soft-focus controls worked.
+- Git branch/tag history and commit metadata were inspected. Published history
+  contains no private context Markdown or development-agent commit attribution;
+  a rewrite was unnecessary. The existing five-document allowlist was retained
+  and explicit context exclusions strengthened. Native runtime release retained.
+
+Evidence: .cache/layout-acceptance/report.json and rendered PNGs,
+.cache/desktop-browser-report.json, .cache/desktop-smoke-report.json,
+.cache/desktop-integration-report.json and .cache/rename-installer-report.json.
+Scaling checks exercise effective viewport reflow and enlarged text, plus real
+Electron zoom for browser bounds; they do not replace manual Windows display
+settings and assistive-technology acceptance. The user's fresh reinstall remains
+an independent final acceptance test.
+
+## Version 0.1.2 additions
+
+- Thirteen setup, prompt, vault-reference and focus tests passed. New coverage
+  includes complete setup ordering/failure/cancellation, a single final completion
+  event, inspection-only suggestions, invalid model output, reference provenance,
+  inert Markdown metadata and preservation of existing notes/source bytes.
+- Live Wikimedia Commons search, image download, attribution/hash verification
+  and chooser-to-vault saving passed. Opening a suggested query does not submit it.
+- Real local Qwen3-VL inspection returned editable suggestions for a synthetic
+  image. Suggestions do not submit an editing prompt.
+- Obsidian's pinned official installer passed publisher verification, extraction,
+  executable presence and isolated vault registration. The signature checker now
+  explicitly imports Windows PowerShell's built-in security module, avoiding
+  incompatible modules inherited from another PowerShell installation.
+- Packaged empty-workspace smoke passed, including automatic setup display,
+  synthetic tone/focus edits, cancellation, original preservation and relaunch.
+- Packaged complete setup passed in a fresh workspace using cached downloads,
+  with every pinned hash verified and every component extracted. Runtime,
+  assistant, photo, legacy and Obsidian completed in order; only the final event
+  released setup. After restart, Torch 2.7.1+cu128 detected the RTX 5090. The real
+  Qwen3-VL suggestion UI filled a draft without submission, edits or source changes.
+  Its synthetic screenshot was inspected.
+
+Evidence: .cache/prompt-suggestion-acceptance/report.json,
+.cache/obsidian-setup-acceptance-report.json,
+.cache/complete-setup-acceptance-report.json and the updated smoke report.
+The 0.1.2 checks above were performed on a local build before the 0.1.3 release.
+
 ## Passed locally
 
 - Fresh pinned redistributable Python imports, TypeScript/Vite production build,
@@ -44,8 +112,8 @@ and .cache/desktop-browser-report.json. Installer evidence is in
 
 - A clean interactive Windows VM was unavailable. A GitHub Windows runner builds
   and runs packaged smoke checks; that is not a full clean-machine installer test.
-- Packaged real Adobe editing and optional Obsidian installation have not been
-  revalidated in this acceptance run. Existing integration boundaries are retained.
+- Packaged real Adobe editing has not been revalidated in this acceptance run.
+  Existing integration boundaries are retained.
 - Installer signing is not configured. Local installer Authenticode status is
   NotSigned; generic electron-builder signing log entries do not change that.
 - Soft-focus improvement is tested against known synthetic mild blur. Recovery of

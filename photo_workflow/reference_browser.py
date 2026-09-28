@@ -31,9 +31,12 @@ class Browser:
         row=ttk.Frame(root);row.pack(fill='x',padx=14,pady=12)
         ttk.Button(row,text='Add displayed reference',command=self.add).pack(side='left')
         self.count=ttk.Label(row,text='0 selected');self.count.pack(side='left',padx=14)
+        self.save_vault=tk.BooleanVar(value=True)
+        ttk.Checkbutton(row,text='Save chosen references in Photo Vault',variable=self.save_vault).pack(side='left')
         ttk.Button(row,text='Use selected references',command=self.done).pack(side='right')
-        root.protocol('WM_DELETE_WINDOW',self.done);root.after(100,self.poll)
+        root.protocol('WM_DELETE_WINDOW',self.close);root.after(100,self.poll)
         self.current=None;self.search_query='';self.generation=0
+        self.saved={}
 
     def background(self, kind, function):
         if self.busy:return
@@ -90,7 +93,19 @@ class Browser:
         self.root.after(100,self.poll)
 
     def done(self):
-        json_write(self.output,self.selected);self.root.destroy()
+        if self.busy:return
+        try:
+            if self.save_vault.get():
+                from .vault import save_reference
+                for path in self.selected:
+                    if path not in self.saved:self.saved[path]=str(save_reference(path))
+            json_write(self.output,{'references':self.selected,'notes':[self.saved[p] for p in self.selected if p in self.saved]})
+            self.root.destroy()
+        except Exception as error:messagebox.showerror('Could not save references',str(error),parent=self.root)
+
+    def close(self):
+        json_write(self.output,{'cancelled':True})
+        self.root.destroy()
 
 
 def main():

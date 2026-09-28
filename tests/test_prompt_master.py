@@ -2,10 +2,31 @@ import json
 import threading
 import unittest
 import urllib.request
-from photo_workflow.prompt_master import validate_rewrite
+from pathlib import Path
+import tempfile
+from unittest.mock import Mock
+from photo_workflow.prompt_master import validate_rewrite, suggest
 
 
 class PromptMasterTests(unittest.TestCase):
+    def test_suggestions_inspect_only_and_validate_model_output(self):
+        workspace=Mock(selected_input=Path('photo.png'))
+        valid={'summary':'Slight shadow noise; texture is visible.', 'prompts':['Reduce shadow noise gently; preserve texture.']}
+        with tempfile.TemporaryDirectory() as directory:
+            marker=Path(directory)/'cancel'
+            workspace.call.return_value={'observations':json.dumps(valid),'backend':'local-fixture'}
+            result=suggest(workspace,threading.Lock(),marker)
+            self.assertEqual(result['prompts'],valid['prompts'])
+            workspace.call.assert_called_once()
+            self.assertEqual(workspace.call.call_args.args[0],'inspect_photo')
+            self.assertEqual(workspace.call.call_args.args[1]['view'],'source')
+            self.assertEqual(workspace.call.call_args.args[1]['path'],'')
+            for body in ('not json', '[]', json.dumps({**valid,'prompts':['/edit']}), json.dumps({**valid,'prompts':[]})):
+                workspace.call.return_value={'observations':body,'backend':'local-fixture'}
+                with self.assertRaisesRegex(ValueError,'invalid suggestions'):suggest(workspace,threading.Lock(),marker)
+            marker.touch()
+            with self.assertRaises(InterruptedError):suggest(workspace,threading.Lock(),marker)
+
     def test_protected_literals(self):
         original='Denois "D:\\Photos\\face.png" by 0.25, do not restore faces.'
         corrected=original.replace('Denois', 'Denoise')
