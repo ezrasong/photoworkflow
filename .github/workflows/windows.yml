@@ -1,0 +1,90 @@
+name: Windows desktop
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.3'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.10'
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: '0.12.13'
+      - name: Fetch pinned native runtime
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory -Force .cache/native | Out-Null
+          gh release download native-runtime-v1 --repo $env:GITHUB_REPOSITORY --pattern selective_scan_cuda.pyd --dir .cache/native
+          if ($LASTEXITCODE -ne 0) { throw 'Native runtime release is unavailable' }
+      - name: Build fresh redistributable backend
+        run: python packaging/build_backend.py --native .cache/native/selective_scan_cuda.pyd
+      - name: Setup boundary tests
+        run: python -m unittest tests.test_desktop_installation
+      - name: Install locked desktop dependencies
+        working-directory: desktop
+        run: npm ci
+      - name: Desktop checks
+        working-directory: desktop
+        run: |
+          npm test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm audit --audit-level=high
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm run build
+      - name: Package Windows NSIS
+        working-directory: desktop
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+        run: npx electron-builder --win nsis --x64 --publish never
+      - name: Packaged application smoke test
+        working-directory: desktop
+        run: npm run smoke
+      - name: Installer checksums
+        shell: pwsh
+        run: |
+          Get-ChildItem desktop/dist -Filter '*Setup.exe' | ForEach-Object {
+            $digest=(Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLower()
+            "$digest  $($_.Name)" | Set-Content -Encoding ascii ($_.FullName+'.sha256')
+          }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PhotoWorkflow-windows-x64
+          path: |
+            desktop/dist/*Setup.exe
+            desktop/dist/*.sha256
+            .cache/desktop-smoke-report.json
+          if-no-files-found: error
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: PhotoWorkflow-windows-x64
+          path: artifacts
+      - name: Publish versioned installer
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --title "Photo Workflow $GITHUB_REF_NAME" --notes "Windows x64 photo desktop. See verification and limitations in the repository. Signing is available only when configured; check the downloaded executable signature."
+          find artifacts -type f \( -name '*Setup.exe' -o -name '*.sha256' \) -exec gh release upload "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" {} +

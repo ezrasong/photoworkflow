@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "lama_revision": "786f5936b27fb3dacd2b1ad799e4de968ea697e7",
+  "lama_archive": {
+    "url": "https://huggingface.co/smartywu/big-lama/resolve/05cb2be7f8dbe6ca7c6e78f4fc827a4b2baaa4a9/big-lama.zip",
+    "sha256": "f1b358ca24093b93a106183b98a3dea6e8ed09f3b43ea7251eb2c81e7b4575f6",
+    "bytes": 381428720
+  },
+  "torchvision_version": "0.22.1+cu128",
+  "files": {
+    "apps/LaMa/saicinpainting/training/modules/ffc.py": {
+      "sha256": "62327e5cc5d30e614a403eeb85ec68f655d4b5b7dad89be257b697a0b81610e4",
+      "bytes": 17771,
+      "url": "https://raw.githubusercontent.com/advimman/lama/786f5936b27fb3dacd2b1ad799e4de968ea697e7/saicinpainting/training/modules/ffc.py",
+      "upstream_sha256": "1647ce037032e533c777fd1d486c61d3ecc0eee7603b8cb96b23d0deffcaf308",
+      "upstream_bytes": 17753
+    },
+    "apps/LaMa/saicinpainting/training/modules/base.py": {
+      "sha256": "526016ea45cd40b17b1bfa812c3be1ae227b735de684cd77382a5788eb5ac4aa",
+      "bytes": 2684,
+      "url": "https://raw.githubusercontent.com/advimman/lama/786f5936b27fb3dacd2b1ad799e4de968ea697e7/saicinpainting/training/modules/base.py",
+      "upstream_sha256": "526016ea45cd40b17b1bfa812c3be1ae227b735de684cd77382a5788eb5ac4aa",
+      "upstream_bytes": 2684
+    },
+    "apps/LaMa/saicinpainting/training/modules/spatial_transform.py": {
+      "sha256": "3438b3864ebc45210b270a8467ac07aaf0c8b27b36fccd9ea898894e87e2baa5",
+      "bytes": 2087,
+      "url": "https://raw.githubusercontent.com/advimman/lama/786f5936b27fb3dacd2b1ad799e4de968ea697e7/saicinpainting/training/modules/spatial_transform.py",
+      "upstream_sha256": "4f479a0c9ba94bd46b197507e8e8cdcc570e84ec29f5a577ade63e542adb43b5",
+      "upstream_bytes": 1976
+    },
+    "apps/LaMa/saicinpainting/training/modules/squeeze_excitation.py": {
+      "sha256": "933c53adb2477b99c58ab325b26b124507a06b8c097ed2dd213c28f5841839fe",
+      "bytes": 609,
+      "url": "https://raw.githubusercontent.com/advimman/lama/786f5936b27fb3dacd2b1ad799e4de968ea697e7/saicinpainting/training/modules/squeeze_excitation.py",
+      "upstream_sha256": "933c53adb2477b99c58ab325b26b124507a06b8c097ed2dd213c28f5841839fe",
+      "upstream_bytes": 609
+    },
+    "apps/LaMa/saicinpainting/training/modules/depthwise_sep_conv.py": {
+      "sha256": "9aa49550f3d34f1682cabbcc92f89d5f131ff0e89ebeefbfde396a85153c5b22",
+      "bytes": 557,
+      "url": "https://raw.githubusercontent.com/advimman/lama/786f5936b27fb3dacd2b1ad799e4de968ea697e7/saicinpainting/training/modules/depthwise_sep_conv.py",
+      "upstream_sha256": "9aa49550f3d34f1682cabbcc92f89d5f131ff0e89ebeefbfde396a85153c5b22",
+      "upstream_bytes": 557
+    },
+    "apps/LaMa/saicinpainting/training/modules/multidilated_conv.py": {
+      "sha256": "26929410919ebe0e024bd65d318978d14bdefcfeef94d079ae9c4d20189f2780",
+      "bytes": 4060,
+      "url": "https://raw.githubusercontent.com/advimman/lama/786f5936b27fb3dacd2b1ad799e4de968ea697e7/saicinpainting/training/modules/multidilated_conv.py",
+      "upstream_sha256": "26929410919ebe0e024bd65d318978d14bdefcfeef94d079ae9c4d20189f2780",
+      "upstream_bytes": 4060
+    },
+    "apps/LaMa/saicinpainting/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "generated": "empty package initializer"
+    },
+    "apps/LaMa/saicinpainting/training/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "generated": "empty package initializer"
+    },
+    "apps/LaMa/saicinpainting/training/modules/__init__.py": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "generated": "empty package initializer"
+    },
+    "docs/major-editing-research/lama-license.txt": {
+      "sha256": "4ceeeac5a802e86c413c22b16cce8e9a22027b0250c97e6f8ac97c14cf0542c0",
+      "bytes": 11348,
+      "url": "https://raw.githubusercontent.com/advimman/lama/786f5936b27fb3dacd2b1ad799e4de968ea697e7/LICENSE"
+    },
+    "docs/major-editing-research/torchvision-license.txt": {
+      "sha256": "6502f676851cfe25f8af75531dfb32375b7325b73c37e7b43741fa422893e71d",
+      "bytes": 1517,
+      "url": "https://raw.githubusercontent.com/pytorch/vision/v0.22.1/LICENSE"
+    },
+    "models/big-lama-generator.pth": {
+      "sha256": "5fe691ba5b4d5056947b41467482cbd206a436fc6289312b43ddb0db19c0dd65",
+      "bytes": 204535621,
+      "generated": "generator state_dict extracted with weights_only and inert metadata placeholders"
+    },
+    "models/maskrcnn_resnet50_fpn_v2_coco.pth": {
+      "sha256": "73cbd0190fcbe3ba339921fbce2c3a0b6bb9126c9a133c85e43a2a8e060a109e",
+      "bytes": 185828065,
+      "url": "https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth"
+    },
+    "models/config.yaml": {
+      "sha256": "4fdeed49926e13b101c4dd9e193acec9e58677dfdb4ba49dd6a3a8927964e2a7",
+      "bytes": 3947,
+      "generated": "big-lama/config.yaml from pinned archive"
+    }
+  },
+  "torchvision_revision": "59a3e1f9f78cfe44cb989877cc6f4ea77c8a75ca"
+}

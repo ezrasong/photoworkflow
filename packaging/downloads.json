@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "files": {
+    "models/GFPGANv1.4.pth": {
+      "url": "https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.4.pth",
+      "sha256": "e2cd4703ab14f4d01fd1383a8a8b266f9a5833dacee8e6a79d3bf21a1b6be5ad",
+      "bytes": 348632874,
+      "group": "photo"
+    },
+    "models/RealESRGAN_x4plus.pth": {
+      "url": "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth",
+      "sha256": "4fa0d38905f75ac06eb49a7951b426670021be3018265fd191d2125df9d682f1",
+      "bytes": 67040989,
+      "group": "photo"
+    },
+    "models/detection_Resnet50_Final.pth": {
+      "url": "https://github.com/xinntao/facexlib/releases/download/v0.1.0/detection_Resnet50_Final.pth",
+      "sha256": "6d1de9c2944f2ccddca5f5e010ea5ae64a39845a86311af6fdf30841b0a5a16d",
+      "bytes": 109497761,
+      "group": "photo"
+    },
+    "models/parsing_parsenet.pth": {
+      "url": "https://github.com/xinntao/facexlib/releases/download/v0.2.2/parsing_parsenet.pth",
+      "sha256": "3d558d8d0e42c20224f13cf5a29c79eba2d59913419f945545d8cf7b72920de2",
+      "bytes": 85331193,
+      "group": "photo"
+    },
+    "apps/llama-downloads/llama.zip": {
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11193/llama-b11193-bin-win-cuda-13.4-x64.zip",
+      "sha256": "bf9d6fde3f3573f486030ef226b6bf2c158dfae0a8878962b5ab44216103569e",
+      "bytes": 151726852,
+      "group": "assistant"
+    },
+    "apps/llama-downloads/cudart.zip": {
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11193/cudart-llama-bin-win-cuda-13.4-x64.zip",
+      "sha256": "738f8c251ac22b70c3ae6f83a10cf222725df0395246a2cf58f32bdb85fbe668",
+      "bytes": 423535356,
+      "group": "assistant"
+    },
+    "models/Qwen3-4B-Q4_K_M.gguf": {
+      "url": "https://huggingface.co/Qwen/Qwen3-4B-GGUF/resolve/bc640142c66e1fdd12af0bd68f40445458f3869b/Qwen3-4B-Q4_K_M.gguf",
+      "sha256": "7485fe6f11af29433bc51cab58009521f205840f5b4ae3a32fa7f92e8534fdf5",
+      "bytes": 2497280256,
+      "group": "legacy"
+    },
+    "models/drunet_color.pth": {
+      "url": "https://github.com/cszn/KAIR/releases/download/v1.0/drunet_color.pth",
+      "sha256": "479abe3c5327dfd10ff54a80ec7d4098ca80752a5c9492cdff31cee430bec4b4",
+      "bytes": 130579305,
+      "group": "photo"
+    },
+    "apps/oh-my-pi/omp-windows-x64.exe": {
+      "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.2/omp-windows-x64.exe",
+      "sha256": "5d99fe5c11ec3ff1792e427c0e61eeb5a6c84670cadb65d023dd2f5eb8705f40",
+      "bytes": 235686912,
+      "group": "assistant"
+    },
+    "models/Qwen3-14B-Q4_K_M.gguf": {
+      "url": "https://huggingface.co/Qwen/Qwen3-14B-GGUF/resolve/530227a7d994db8eca5ab5ced2fb692b614357fd/Qwen3-14B-Q4_K_M.gguf",
+      "sha256": "500a8806e85ee9c83f3ae08420295592451379b4f8cf2d0f41c15dffeb6b81f0",
+      "bytes": 9001752960,
+      "group": "legacy"
+    },
+    "models/Qwen3VL-30B-A3B-Instruct-Q4_K_M.gguf": {
+      "url": "https://huggingface.co/Qwen/Qwen3-VL-30B-A3B-Instruct-GGUF/resolve/f54435e6cc31258f04b0969105c3f6badb197931/Qwen3VL-30B-A3B-Instruct-Q4_K_M.gguf",
+      "sha256": "87bb374d849f80ebdfabb304189fac9e0bd35a0f74506e6a59c51b206cbe863b",
+      "bytes": 18556687168,
+      "group": "assistant"
+    },
+    "models/mmproj-Qwen3VL-30B-A3B-Instruct-F16.gguf": {
+      "url": "https://huggingface.co/Qwen/Qwen3-VL-30B-A3B-Instruct-GGUF/resolve/f54435e6cc31258f04b0969105c3f6badb197931/mmproj-Qwen3VL-30B-A3B-Instruct-F16.gguf",
+      "sha256": "cae72cf123cc9e08d553cd5a5055d6d3cf0f82652aa41c3e4aa424cda9a26f7f",
+      "bytes": 1083499584,
+      "group": "assistant"
+    },
+    "models/scunet_color_real_psnr.pth": {
+      "sha256": "fa78899ba2caec9d235a900e91d96c689da71c42029230c2028b00f09f809c2e",
+      "bytes": 71982841,
+      "url": "https://github.com/cszn/KAIR/releases/download/v1.0/scunet_color_real_psnr.pth",
+      "group": "photo"
+    },
+    "models/maskrcnn_resnet50_fpn_v2_coco.pth": {
+      "sha256": "73cbd0190fcbe3ba339921fbce2c3a0b6bb9126c9a133c85e43a2a8e060a109e",
+      "bytes": 185828065,
+      "url": "https://download.pytorch.org/models/maskrcnn_resnet50_fpn_v2_coco-73cbd019.pth",
+      "group": "photo"
+    },
+    "models/mambairv2_classicSR_Large_x2.pth": {
+      "sha256": "ff04665df03dd6a9836d3f89c2a2a8e8ba6167e6e54de2f4ab30b07693e8c9bc",
+      "bytes": 137970983,
+      "url": "https://github.com/csguoh/MambaIR/releases/download/v1.0/mambairv2_classicSR_Large_x2.pth",
+      "group": "photo"
+    },
+    "models/mambairv2_classicSR_Large_x4.pth": {
+      "sha256": "9f9090cda07ed4b8498c2db9863c8c263cd300f445017ec77b7fc8babbb8a78d",
+      "bytes": 138562575,
+      "url": "https://github.com/csguoh/MambaIR/releases/download/v1.0/mambairv2_classicSR_Large_x4.pth",
+      "group": "photo"
+    },
+    ".cache/downloads/big-lama.zip": {
+      "url": "https://huggingface.co/smartywu/big-lama/resolve/05cb2be7f8dbe6ca7c6e78f4fc827a4b2baaa4a9/big-lama.zip",
+      "sha256": "f1b358ca24093b93a106183b98a3dea6e8ed09f3b43ea7251eb2c81e7b4575f6",
+      "bytes": 381428720,
+      "group": "photo",
+      "extract": "lama"
+    },
+    ".cache/downloads/torch.whl": {
+      "url": "https://download.pytorch.org/whl/cu128/torch-2.7.1%2Bcu128-cp312-cp312-win_amd64.whl",
+      "sha256": "2bb8c05d48ba815b316879a18195d53a6472a03e297d971e916753f8e1053d30",
+      "bytes": 3273024349,
+      "group": "runtime",
+      "extract": "wheel"
+    },
+    ".cache/downloads/torchvision.whl": {
+      "url": "https://download.pytorch.org/whl/cu128/torchvision-0.22.1%2Bcu128-cp312-cp312-win_amd64.whl",
+      "sha256": "650561ba326d21021243f5e064133dc62dc64d52f79623db5cd76637a9665f96",
+      "bytes": 7638377,
+      "group": "runtime",
+      "extract": "wheel"
+    },
+    ".cache/Obsidian-1.13.7.exe": {
+      "url": "https://github.com/obsidianmd/obsidian-releases/releases/download/v1.13.7/Obsidian-1.13.7.exe",
+      "sha256": "f233dc24896b3f2d5f9e4b01111181a561d0760b2105f0a474024c5f3143a9bc",
+      "bytes": 331012528,
+      "group": "obsidian"
+    },
+    ".cache/7zr.exe": {
+      "url": "https://github.com/ip7z/7zip/releases/download/26.03/7zr.exe",
+      "sha256": "ad4c82fadcbdf93c03b4fc440f300509c7d60c5c2f4d183e35d9d70d6957037d",
+      "bytes": 602624,
+      "group": "obsidian"
+    },
+    ".cache/7z2603-x64.exe": {
+      "url": "https://github.com/ip7z/7zip/releases/download/26.03/7z2603-x64.exe",
+      "sha256": "0859c524b8a63551848f0c246abddcb1d0b7b656b0fbfe879f8d85e61a9e6edd",
+      "bytes": 1661239,
+      "group": "obsidian"
+    }
+  }
+}

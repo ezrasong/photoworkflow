@@ -1,0 +1,67 @@
+{
+  "name": "photo-workflow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local photo editing with Oh My Pi",
+  "author": "Photo Workflow contributors",
+  "main": "out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "tsc --noEmit && electron-vite build",
+    "test": "node --test tests/*.test.cjs",
+    "package": "npm run build && electron-builder --win nsis --x64 --publish never",
+    "smoke": "node scripts/smoke.cjs"
+  },
+  "dependencies": {
+    "electron-window-state": "5.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.15",
+    "electron": "42.11.8",
+    "electron-builder": "26.15.2",
+    "electron-vite": "5.0.0",
+    "playwright": "1.58.2",
+    "solid-js": "1.9.15",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vite-plugin-solid": "2.11.10"
+  },
+  "build": {
+    "appId": "local.photoworkflow.desktop",
+    "productName": "Photo Workflow",
+    "artifactName": "PhotoWorkflow-${version}-${arch}-Setup.${ext}",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "out/**/*",
+      "vendor/opencode/LICENSE"
+    ],
+    "extraResources": [
+      {
+        "from": "../.cache/packaging/bundle",
+        "to": "backend",
+        "filter": [
+          "**/*",
+          "!**/__pycache__/**",
+          "!**/*.pyc"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "signAndEditExecutable": true
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": null
+  }
+}

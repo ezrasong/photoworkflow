@@ -1,0 +1,12 @@
+const test=require('node:test')
+const assert=require('node:assert/strict')
+const fs=require('node:fs')
+const path=require('node:path')
+test('renderer and preload do not acquire process or generic IPC capabilities',()=>{
+ const preload=fs.readFileSync(path.join(__dirname,'../src/preload/index.ts'),'utf8')
+ assert.ok(!preload.includes('send:(channel'))
+ assert.ok(!preload.includes('require('))
+ const html=fs.readFileSync(path.join(__dirname,'../src/renderer/index.html'),'utf8')
+ assert.ok(html.includes("object-src 'none'"))
+ assert.ok(!html.includes("script-src 'self' 'unsafe"))
+})

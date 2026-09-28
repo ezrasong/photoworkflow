@@ -1,0 +1,48 @@
+{
+  "architecture_source": "https://github.com/csguoh/MambaIR",
+  "revision": "33d7b3460c4665229334cc8de38c7f4c766ed3be",
+  "weights_release": "https://github.com/csguoh/MambaIR/releases/tag/v1.0",
+  "scan_source": "https://github.com/state-spaces/mamba/tree/v2.2.5",
+  "architecture_patch": "Selective-scan import redirected to inference-only local CUDA adapter",
+  "kernel_patches": "NVIDIA branches selected; static constexpr BOOL_SWITCH; forward-only binding; Windows build flags",
+  "files": {
+    "models/mambairv2_classicSR_Large_x2.pth": {
+      "sha256": "ff04665df03dd6a9836d3f89c2a2a8e8ba6167e6e54de2f4ab30b07693e8c9bc",
+      "bytes": 137970983,
+      "url": "https://github.com/csguoh/MambaIR/releases/download/v1.0/mambairv2_classicSR_Large_x2.pth"
+    },
+    "models/mambairv2_classicSR_Large_x4.pth": {
+      "sha256": "9f9090cda07ed4b8498c2db9863c8c263cd300f445017ec77b7fc8babbb8a78d",
+      "bytes": 138562575,
+      "url": "https://github.com/csguoh/MambaIR/releases/download/v1.0/mambairv2_classicSR_Large_x4.pth"
+    },
+    "apps/MambaIR/options/test_MambaIRv2_SRLarge_x2.yml": {
+      "sha256": "2d3aba9d002e6ba2b28407a9826ee3f1adc070fc303c7c6671dc1607aceaaa26",
+      "bytes": 2248
+    },
+    "apps/MambaIR/options/test_MambaIRv2_SRLarge_x4.yml": {
+      "sha256": "fbfe1b404b8dd0bd5d36e26cab3b4de305c98c12d785ab56ce3185f11a632785",
+      "bytes": 2272
+    },
+    "apps/MambaIR/basicsr/archs/mambairv2_arch.py": {
+      "sha256": "d93998d0023009bd478bc32477fa8e9d05743d6e12757a6aa1a03453e420c87d",
+      "bytes": 40034
+    },
+    "apps/mamba-scan-build/selective_scan_cuda.pyd": {
+      "sha256": "96b260049288d53797dd152d2a031bd44bb427f4c3e4e99491439f7ca936ce15",
+      "bytes": 23131136
+    },
+    "scripts/build_mamba_scan.py": {
+      "sha256": "c82f9034caf79b34876536694a3b3c5a68c9962b80a33d7381a45fc127a369f3",
+      "bytes": 2481
+    },
+    "photo_workflow/mamba_scan.py": {
+      "sha256": "948532d8ec3c15795146d1a0c3e48ced1ec964e42959be1a37e07ef2c601389f",
+      "bytes": 1496
+    },
+    "photo_workflow/mambair.py": {
+      "sha256": "9b0bb886d43afc8b7fe8d18609bc1189a4ac898522273b1a884d9df7c0519399",
+      "bytes": 4998
+    }
+  }
+}

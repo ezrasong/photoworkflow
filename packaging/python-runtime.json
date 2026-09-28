@@ -1,0 +1,7 @@
+{
+  "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20250529/cpython-3.12.10%2B20250529-x86_64-pc-windows-msvc-install_only_stripped.tar.gz",
+  "sha256": "ca22a9a9e64ecab6d0b5de7cdf8b679ccaa41e9def6aaa2b4aaa6bb23ec7aaba",
+  "bytes": 21172386,
+  "version": "3.12.10",
+  "build": "20250529"
+}

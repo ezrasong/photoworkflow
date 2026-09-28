@@ -1,0 +1,29 @@
+Photo Workflow incorporates modified OpenCode desktop and UI source under MIT.
+Copyright (c) 2026 Anomaly. Full notice: desktop/vendor/opencode/LICENSE.
+Pinned upstream and adaptation map: desktop/UPSTREAM.md.
+
+Oh My Pi 18.3.2 remains the assistant engine, under MIT. Its release LICENSE and
+THIRD-PARTY-NOTICES are shipped in packaging/seed/apps/oh-my-pi and installed with
+the application. No OpenCode assistant, cloud provider, terminal or coding tool
+is included in the desktop renderer.
+
+Python 3.12.10 and Tcl/Tk are redistributed from python-build-standalone build
+20250529. Python's LICENSE.txt and bundled library notices accompany the runtime.
+Python package distributions retain dist-info license files in the installer.
+Electron's LICENSE and LICENSES.chromium.html accompany the installed application.
+
+Model/code license notices accompany packaging/seed and downloaded archives.
+Pinned model provenance is retained in packaging/seed/models/*manifest.json.
+Includes GFPGAN, Real-ESRGAN, BasicSR, facexlib, DPIR, SCUNet, MambaIR, Mamba,
+torchvision, LaMa, Qwen and llama.cpp. SCUNet/KAIR weights have no separately
+attached weight license; code licenses must not be represented as independent
+weight licenses. Model publishers' restrictions and attribution still apply.
+
+Mamba selective-scan binary: upstream state-spaces/mamba v2.2.5, Apache-2.0;
+forward-only Windows adaptations are maintained in scripts/build_mamba_scan.py.
+The prebuilt binary requires CPython 3.12, PyTorch 2.7.1/cu128, Windows x64 and
+compute capability 12.0. The source license accompanies packaging/seed/licenses.
+
+Obsidian is optional, separately licensed, and downloaded only through explicit
+setup from its official signed release. Photoshop and Lightroom are not bundled.
+No rights to users' photographs, notes or Adobe software are granted by this app.

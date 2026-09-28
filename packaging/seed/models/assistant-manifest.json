@@ -1,0 +1,162 @@
+{
+  "llama_version": "b11193",
+  "qwen_revision": "bc640142c66e1fdd12af0bd68f40445458f3869b",
+  "dpir_revision": "15bca3fcc1f3cc51a1f99ccf027691e278c19354",
+  "files": {
+    "apps/llama-downloads/llama.zip": {
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11193/llama-b11193-bin-win-cuda-13.4-x64.zip",
+      "sha256": "bf9d6fde3f3573f486030ef226b6bf2c158dfae0a8878962b5ab44216103569e",
+      "bytes": 151726852
+    },
+    "apps/llama-downloads/cudart.zip": {
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11193/cudart-llama-bin-win-cuda-13.4-x64.zip",
+      "sha256": "738f8c251ac22b70c3ae6f83a10cf222725df0395246a2cf58f32bdb85fbe668",
+      "bytes": 423535356
+    },
+    "models/Qwen3-4B-Q4_K_M.gguf": {
+      "url": "https://huggingface.co/Qwen/Qwen3-4B-GGUF/resolve/bc640142c66e1fdd12af0bd68f40445458f3869b/Qwen3-4B-Q4_K_M.gguf",
+      "sha256": "7485fe6f11af29433bc51cab58009521f205840f5b4ae3a32fa7f92e8534fdf5",
+      "bytes": 2497280256
+    },
+    "models/drunet_color.pth": {
+      "url": "https://github.com/cszn/KAIR/releases/download/v1.0/drunet_color.pth",
+      "sha256": "479abe3c5327dfd10ff54a80ec7d4098ca80752a5c9492cdff31cee430bec4b4",
+      "bytes": 130579305
+    },
+    "apps/DPIR/models/network_unet.py": {
+      "url": "https://raw.githubusercontent.com/cszn/DPIR/15bca3fcc1f3cc51a1f99ccf027691e278c19354/models/network_unet.py",
+      "sha256": "41c3cc38b2eac3b239aec6a723aefef6c138e5dd8ceb6cd9e18f825248261e91",
+      "bytes": 16619
+    },
+    "apps/DPIR/models/basicblock.py": {
+      "url": "https://raw.githubusercontent.com/cszn/DPIR/15bca3fcc1f3cc51a1f99ccf027691e278c19354/models/basicblock.py",
+      "sha256": "aab51f43fee655fda5c499a0481fffd45bf390bdb8229944262c41e0a900cec1",
+      "bytes": 21015
+    },
+    "apps/DPIR/LICENSE": {
+      "url": "https://raw.githubusercontent.com/cszn/DPIR/15bca3fcc1f3cc51a1f99ccf027691e278c19354/LICENSE",
+      "sha256": "afd973a2b98d60d178342477feed2c5673640288b0663e83e33e0e63ece9634c",
+      "bytes": 1089
+    },
+    "apps/DPIR/main_dpir_denoising.py": {
+      "url": "https://raw.githubusercontent.com/cszn/DPIR/15bca3fcc1f3cc51a1f99ccf027691e278c19354/main_dpir_denoising.py",
+      "sha256": "3c192e472b0b29ddf81f9416a8bc5cf7f81f6a6c2469016c14f3420586a963fb",
+      "bytes": 6391
+    },
+    "docs/assistant-sources/llama-license.txt": {
+      "url": "https://raw.githubusercontent.com/ggml-org/llama.cpp/b11193/LICENSE",
+      "sha256": "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d",
+      "bytes": 1078
+    },
+    "docs/assistant-sources/qwen-license.txt": {
+      "url": "https://huggingface.co/Qwen/Qwen3-4B-GGUF/raw/bc640142c66e1fdd12af0bd68f40445458f3869b/LICENSE",
+      "sha256": "5de36594c10839788a8c589443a8ef9d8b8d17c65a1b5807206ae037fc36c6bd",
+      "bytes": 11544
+    },
+    "apps/oh-my-pi/omp-windows-x64.exe": {
+      "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.2/omp-windows-x64.exe",
+      "sha256": "5d99fe5c11ec3ff1792e427c0e61eeb5a6c84670cadb65d023dd2f5eb8705f40",
+      "bytes": 235686912
+    },
+    "apps/oh-my-pi/LICENSE": {
+      "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.2/LICENSE",
+      "sha256": "16c45f9d667442781f03fa198914cc39abcaa48ec5ed8f644643e554ca2fbf63",
+      "bytes": 1144
+    },
+    "apps/oh-my-pi/SHA256SUMS.txt": {
+      "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.2/SHA256SUMS.txt",
+      "sha256": "8917ab0c44a533e457aa479128939077b258fb583fe5d9cb35c167a2d16ff71a",
+      "bytes": 934
+    },
+    "apps/oh-my-pi/THIRD-PARTY-NOTICES.txt": {
+      "url": "https://github.com/can1357/oh-my-pi/releases/download/v18.3.2/THIRD-PARTY-NOTICES.txt",
+      "sha256": "d0c2e7c05bb4d755044b13fa560be58d01ab7c980b87892400a979397e569a8b",
+      "bytes": 1076437
+    },
+    "models/Qwen3-14B-Q4_K_M.gguf": {
+      "url": "https://huggingface.co/Qwen/Qwen3-14B-GGUF/resolve/530227a7d994db8eca5ab5ced2fb692b614357fd/Qwen3-14B-Q4_K_M.gguf",
+      "sha256": "500a8806e85ee9c83f3ae08420295592451379b4f8cf2d0f41c15dffeb6b81f0",
+      "bytes": 9001752960
+    },
+    "docs/integration-sources/qwen14b-license.txt": {
+      "url": "https://huggingface.co/Qwen/Qwen3-14B-GGUF/resolve/530227a7d994db8eca5ab5ced2fb692b614357fd/LICENSE",
+      "bytes": 11544,
+      "sha256": "5de36594c10839788a8c589443a8ef9d8b8d17c65a1b5807206ae037fc36c6bd"
+    },
+    "models/Qwen3VL-30B-A3B-Instruct-Q4_K_M.gguf": {
+      "url": "https://huggingface.co/Qwen/Qwen3-VL-30B-A3B-Instruct-GGUF/resolve/f54435e6cc31258f04b0969105c3f6badb197931/Qwen3VL-30B-A3B-Instruct-Q4_K_M.gguf",
+      "sha256": "87bb374d849f80ebdfabb304189fac9e0bd35a0f74506e6a59c51b206cbe863b",
+      "bytes": 18556687168
+    },
+    "models/mmproj-Qwen3VL-30B-A3B-Instruct-F16.gguf": {
+      "url": "https://huggingface.co/Qwen/Qwen3-VL-30B-A3B-Instruct-GGUF/resolve/f54435e6cc31258f04b0969105c3f6badb197931/mmproj-Qwen3VL-30B-A3B-Instruct-F16.gguf",
+      "sha256": "cae72cf123cc9e08d553cd5a5055d6d3cf0f82652aa41c3e4aa424cda9a26f7f",
+      "bytes": 1083499584
+    }
+  },
+  "llama_files": {
+    "apps/llama/cublas64_13.dll": "1119dbca0a808e0c8850bb4221e330daf0b5ddb348d62d37b6ac533854723df9",
+    "apps/llama/cublasLt64_13.dll": "0f5bc315fef706b5626248ebd74e8a48a9e82fa2f0cad38330f5f70984913107",
+    "apps/llama/cudart64_13.dll": "05bfafcb97bd53b0089568a96e1e5bd6921637bd0853ff7f5342bd31a6a16890",
+    "apps/llama/ggml-base.dll": "7e4e8cf1edeeb0f8b40de183095a39a51bf6090ea09a1cf928512a250c481d60",
+    "apps/llama/ggml-cpu-alderlake.dll": "e285b7ae65442bf27c998b5a9b005fefa3a9cb634166f1bc483bfe42827c1f20",
+    "apps/llama/ggml-cpu-cannonlake.dll": "3cd66c7573851bb69ec1df89288c2a240bc12e89b93a0af6869c5d29ca1b496b",
+    "apps/llama/ggml-cpu-cascadelake.dll": "fb7896c0db7a0e1beae960a0ac11af05ff346fad07004bbb10307963422f431a",
+    "apps/llama/ggml-cpu-cooperlake.dll": "f7805ee0fb7b426aca44e2325df56404160765e8546fcde0d28857f4c2f8426f",
+    "apps/llama/ggml-cpu-haswell.dll": "557e900747354694265fede17fed107f21d30cf8e973374f9ed4a69be1257617",
+    "apps/llama/ggml-cpu-icelake.dll": "82a610388ca2a60d1102f17a276360e98a46f10c277a3d97c7e965ed46141690",
+    "apps/llama/ggml-cpu-ivybridge.dll": "5b65e3a7d810a7a34f28e6272a93fe59b992d96e33638157b67e4d0456e2abe3",
+    "apps/llama/ggml-cpu-piledriver.dll": "5ce7a97136cc65d7825eab812fc3b23614c0b5f07a89edc0285ab4ecdf3944b6",
+    "apps/llama/ggml-cpu-sandybridge.dll": "70209ea874bd0c95b90fb3940b9b0b020f844df3975a9a082612d0ba0161081c",
+    "apps/llama/ggml-cpu-sapphirerapids.dll": "88781fb5084b0fe659f2e4cf8d9b07cf2973d0507bac5d321bc2b06c43f88a3c",
+    "apps/llama/ggml-cpu-skylakex.dll": "9e50993f1068e8cacd564b60c791a5479bc10fe3f797d3335097f0a2659322cb",
+    "apps/llama/ggml-cpu-sse42.dll": "884f1cd3bc2cb9476a536fa462d28fc50d9dad69927e7f67337717e09cc55d5c",
+    "apps/llama/ggml-cpu-x64.dll": "7e08c6a1cf229a3df9ef77737f3a1dceedd3c9dc2dad0c9cab704934a12e3a94",
+    "apps/llama/ggml-cpu-zen4.dll": "1ba3ff0c75d433002bc5a04072adfec8babf0a6f1bc03effd9904e46e2f1951c",
+    "apps/llama/ggml-cuda.dll": "77ce74d96e3fe329989af14a4c1cf0983908f15d11dab54dbdf3af5006bd7b5c",
+    "apps/llama/ggml-rpc-server.exe": "c890ad5567fdb53934f424cf6182dff01618d8267fe0781b81072eb7156b9d3a",
+    "apps/llama/ggml-rpc.dll": "129633bc7f90745f44ad976e96afc1003493dfdb7fa2e22daaf217359215c5ff",
+    "apps/llama/ggml.dll": "bb616de54ef57f8804d1d22a4bf104e2d98c8e8399b08374e70a7c096322b851",
+    "apps/llama/libomp.dll": "a12116ba72d1d6820407cf30be23da04ce79d6bb8a71a5ee71759c5a1faa6f1c",
+    "apps/llama/LICENSE-LLVM-OpenMP": "fdad1758a9e1f9d5a81e18879b3406772115edc92c24bfa36b70c654f325e8e4",
+    "apps/llama/llama-batched-bench-impl.dll": "c2fab998351a7ea602e05be02ea6ce7495e41cf2c267bc0d9953b73f352ece35",
+    "apps/llama/llama-batched-bench.exe": "a29ac5242caee7319cde13672b20b9af828ce3d4a19811b3c5cd6f3f0ea4b34e",
+    "apps/llama/llama-bench-impl.dll": "005fece0440bf7e9db65704cd11360cd02c85a2ff0f64b23549e23a7d471fbf0",
+    "apps/llama/llama-bench.exe": "e48da7e40c3c94e3b6683f864ac0973a737c3bc8dbed41bd02aa95237d3bad98",
+    "apps/llama/llama-cli-impl.dll": "e756724995a4a17b38fd161694b8274fbb6ab52fe69f53156abcd0b02f0d438c",
+    "apps/llama/llama-cli.exe": "8665774e4384d0d4189521ce4606b655a36dde11ad0fb329ddb328e2cc1212ca",
+    "apps/llama/llama-common.dll": "f888cbaa91fade75eba6b869331e34d2ec42d3417416c364c880f3fcf1452ca2",
+    "apps/llama/llama-completion-impl.dll": "854e6ab294cb4426815f36755c7ff303ff73be82cdc645a012d53a071d170178",
+    "apps/llama/llama-completion.exe": "54eadf7bdb0ecfeff9ad6cee3cf2869c7ac16d2e59d339a3fd1cf74138f87669",
+    "apps/llama/llama-fit-params-impl.dll": "8c5483d1e9823ff60a10ea5e3b02e577a31a2245e21030cb3c338503e7687fdc",
+    "apps/llama/llama-fit-params.exe": "b5f6adb6f58f0cda3d9a707399aabbfc884af35f5cd6e839e32712783786f9ed",
+    "apps/llama/llama-gemma3-cli.exe": "d25aae143498bb2d790a0b3780164903e109a6b448cba69f695f43b97620711e",
+    "apps/llama/llama-gguf-split.exe": "75c4d18c6cb0cf188681c5259015b59df16ced925816595e00eaed890262b8fa",
+    "apps/llama/llama-imatrix.exe": "45369edb7ed22f8c70ffeb5ce2fa2ae889be39d20e7b2d36bd1e0fa3f967084d",
+    "apps/llama/llama-llava-cli.exe": "d25aae143498bb2d790a0b3780164903e109a6b448cba69f695f43b97620711e",
+    "apps/llama/llama-minicpmv-cli.exe": "d25aae143498bb2d790a0b3780164903e109a6b448cba69f695f43b97620711e",
+    "apps/llama/llama-mtmd-cli.exe": "993cd3662f34517ee0a5976ec1abe78dc777d889549960c49b704e887999b8d0",
+    "apps/llama/llama-mtmd-debug.exe": "7684731577486ca4117078402d33e558acd3ba6e08610e6bf7bcf956ed80bd18",
+    "apps/llama/llama-perplexity-impl.dll": "cd63e742b11f902d72dfea05a5d55544757e8b147fc86c0be1f6cdb011811d3a",
+    "apps/llama/llama-perplexity.exe": "3bffebced22112d291735362c5009f2cbaa8014ee20ac6b8078f9d89268f2b62",
+    "apps/llama/llama-quantize-impl.dll": "ec65d102ae6bbb4213dbf67d1800564614b9c0fdef96bdebc03d21473090dcaa",
+    "apps/llama/llama-quantize.exe": "5d950b6969d584eae771bef2b0f98c6644a207b7d73a1a65094407a288c51e01",
+    "apps/llama/llama-qwen2vl-cli.exe": "d25aae143498bb2d790a0b3780164903e109a6b448cba69f695f43b97620711e",
+    "apps/llama/llama-results.exe": "924bf368697872e1c426936a76279db50adf1a7e86839e465157e47b2b321ba9",
+    "apps/llama/llama-server-impl.dll": "986ffcec8af7bf7bf4703aca7a9332b588fdf2a99d374ddc2fc8d0b8792f8292",
+    "apps/llama/llama-server.exe": "eba08aa1a6ad397e8954874ca58f62271cf15ab45a85d6f1f59176a47cabd6c2",
+    "apps/llama/llama-tokenize.exe": "466fa920e21d85bfc8a2977e724d5ef332074aa11839278f3ae3fe2fbf6a11af",
+    "apps/llama/llama-tts.exe": "fe02cc74393a930153955f4ca7217f55d10f69f964babdc15f77f34acf0cbaf6",
+    "apps/llama/llama.dll": "f99c04c7444ad30a7e306d1f1f5a2ad517e2bc7b753a6dfd654ae7931cd1bade",
+    "apps/llama/llama.exe": "7965f56c5a0c3be43e0d4a695c48d3a84c6e5860ec5f9cfbc84ca88ecf9565a9",
+    "apps/llama/mtmd.dll": "a2ad33e61439de6c5803310bce5ed650a52746ce13e97b190a67cbbdd3f30741"
+  },
+  "licenses": {
+    "Qwen3-4B": "Apache-2.0, publisher repository LICENSE",
+    "llama.cpp": "MIT; CUDA runtime libraries retain NVIDIA terms",
+    "DRUNet": "MIT project; official author KAIR v1.0 weights, no separate weights license attached"
+  },
+  "omp_version": "v18.3.2",
+  "qwen_chat_revision": "530227a7d994db8eca5ab5ced2fb692b614357fd",
+  "qwen_vision_revision": "f54435e6cc31258f04b0969105c3f6badb197931"
+}
