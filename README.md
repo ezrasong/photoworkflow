@@ -1,4 +1,4 @@
-# Luma Atelier
+# Photo Studio
 
 A private, local Windows photo studio for editing, restoration and before/after
 review. Built with Electron/Solid components adapted from OpenCode, Oh My Pi as
@@ -7,7 +7,7 @@ the assistant, and a Python photo pipeline.
 ## Install and use
 
 Download the Windows x64 installer from this private repository's Releases page.
-Install and launch **Luma Atelier** from its shortcut; developer tools are not
+Install and launch **Photo Studio** from its shortcut; developer tools are not
 required. First launch opens setup when downloads are missing. Choose
 **Install / repair complete setup** for all models, runtimes, Oh My Pi, Obsidian
 and Photo Vault (about 35 GiB of downloads). Individual components can be repaired.

@@ -51,7 +51,7 @@ class Desktop:
                 prop = torch.cuda.get_device_properties(0)
                 gpu.update(name=prop.name, memory=prop.total_memory, capability=list(torch.cuda.get_device_capability(0)))
             else: gpu['reason'] = 'A supported NVIDIA GPU and driver are required for model inference; CPU fallback is not configured.'
-        except ImportError: gpu['reason'] = 'Install the PyTorch CUDA runtime in Setup, then restart Luma Atelier to detect supported hardware.'
+        except ImportError: gpu['reason'] = 'Install the PyTorch CUDA runtime in Setup, then restart Photo Studio to detect supported hardware.'
         except Exception as error: gpu['reason'] = str(error)
         adobe = {}
         for product, exe in [('Photoshop', 'Photoshop.exe'), ('Lightroom', 'Lightroom.exe')]:

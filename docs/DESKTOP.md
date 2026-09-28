@@ -56,7 +56,7 @@ driver or CUDA toolkit is installed.
 
 ## Window sizing and upgrade identity
 
-Luma Atelier supports a 640×480 minimum window in Windows device-independent
+Photo Studio supports a 640×480 minimum window in Windows device-independent
 pixels. This leaves room for native window controls and a usable scrolling pane.
 Available width selects split panes or Conversation / Controls & review; height
 controls scrolling independently. Navigation can be opened with the menu button.
@@ -65,7 +65,7 @@ available as tooltips; tabs wrap and retain keyboard focus. At high scaling in a
 small window, scroll to reach actions and photo pixels. Native dialogs retain
 Windows keyboard and sizing behavior.
 
-The product, executable, installer and shortcuts use Luma Atelier. Compatibility
+The product, executable, installer and shortcuts use Photo Studio. Compatibility
 identifiers deliberately remain `photo-workflow`, `local.photoworkflow.desktop`,
 `PHOTOWORKFLOW_HOME`, `photo:` and the Lightroom bridge identifier/path. Electron
 explicitly retains `%APPDATA%/photo-workflow`, including its Workspace and saved

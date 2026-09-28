@@ -22,7 +22,7 @@ const api=window.photo
 const basename=(value:string)=>value.split(/[\\/]/).pop()||value
 const size=(n:number)=>(n/1024**3).toFixed(2)+' GiB'
 function App(){
-  const [panel,setPanel]=createSignal('controls'),[sidebar,setSidebar]=createSignal(false)
+  const [panel,setPanel]=createSignal('controls'),[sidebar,setSidebar]=createSignal(window.innerWidth>1100)
   const [pane,setPane]=createSignal('chat')
   const closeNavigation=()=>{if(window.innerWidth<=1100)setSidebar(false)}
   const openPanel=(value:string)=>{setPanel(value);setPane('details');closeNavigation()}
@@ -71,7 +71,7 @@ function App(){
   const send=()=>guard(async()=>{if(!session())throw new Error('Create a session first');setBusy(true);const text=draft();await api.call('prompt',{text});if(draft()===text)setDraft('')})
   const suggest=()=>guard(async()=>{setBusy(true);setJobLabel('Inspecting photo for prompt suggestions');await api.call('suggest');setBusy(false);setJobLabel('Suggestions ready');openPanel('prompts')})
   const searchReferences=()=>guard(async()=>{setBusy(true);setJobLabel('Choose references in the search window');const data=await api.call('references');setBusy(false);setSuggestions(null);setJobLabel('Ready');setActivity(p=>[...p,{type:'references',text:data.cancelled?'Reference search closed':`${data.selected_references} references selected · ${data.saved_vault_notes?.length||0} notes saved in Photo Vault`}])})
-  const setup=async(group:string)=>guard(async()=>{setBusy(true);setSetupMessage('');setJobLabel('Verifying setup');const data=await api.call('setup',{group});setBusy(false);setSetupMessage(data.restartRecommended?'Setup complete. Restart Luma Atelier before model editing.':'Component installed and verified.');await refresh()})
+  const setup=async(group:string)=>guard(async()=>{setBusy(true);setSetupMessage('');setJobLabel('Verifying setup');const data=await api.call('setup',{group});setBusy(false);setSetupMessage(data.restartRecommended?'Setup complete. Restart Photo Studio before model editing.':'Component installed and verified.');await refresh()})
   const showResult=async(item:any)=>{setResult(item);setTab('studio');openPanel('review')}
   const run=()=>guard(async()=>{
     if(!source())throw new Error('Choose a photo or folder first')
@@ -81,7 +81,7 @@ function App(){
   const settings=()=>guard(()=>api.call('settings',{value:{theme:theme(),reviewZoom:zoom()}}))
   return <div class="app" data-theme={theme()} data-navigation={sidebar()} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();void guard(async()=>{if(busy())throw new Error('Wait for the current job before changing input');const paths=await api.drop(Array.from(e.dataTransfer?.files||[]));setSuggestions(null);setSource(paths[0]);if(session())await api.call('select',{kind:'photo',paths});try{setPreview(await api.preview(paths[0]))}catch{setPreview('')}})}}>
     <SidebarShell opened={sidebar()} onToggle={()=>setSidebar(!sidebar())} onSettings={()=>{setTab('setup');closeNavigation()}} onNew={()=>openSession()}><aside class="sidebar">
-      <div class="brand">Luma Atelier<small>Workspace</small></div>
+      <div class="brand">Photo Studio<small>Workspace</small></div>
       <Button variant="primary" class="primary" disabled={busy()} onClick={()=>openSession()}>＋ New session</Button>
       <input aria-label="New project or session title" placeholder="Project / session name" value={projectTitle()} onInput={e=>setProjectTitle(e.currentTarget.value)}/>
       <div class="nav"><Button variant="ghost" classList={{active:tab()==='studio'}} onClick={()=>{setTab('studio');setPane('chat');closeNavigation()}}>Studio</Button><Button variant="ghost" classList={{active:tab()==='studio'&&panel()==='review'}} onClick={()=>{setTab('studio');openPanel('review')}}>Results <span>{results().length}</span></Button><Button variant="ghost" classList={{active:tab()==='setup'}} onClick={()=>{setTab('setup');closeNavigation()}}>Settings</Button></div>
@@ -89,7 +89,7 @@ function App(){
       <div class="local">Local processing · Oh My Pi</div>
     </aside></SidebarShell>
     <main>
-      <header><Button aria-label="Toggle navigation" aria-expanded={sidebar()} variant="ghost" onClick={()=>setSidebar(!sidebar())}>☰</Button><span class="window-title" title={sessions().find(s=>s.id===session())?.title||'New session'}>Luma Atelier <span class="muted"> / {sessions().find(s=>s.id===session())?.title||'New session'}</span></span><div class="state" role="status"><Show when={busy()} fallback={<span class="dot"/>}><Spinner/></Show>{jobLabel().slice(0,65)}</div></header>
+      <header><Button aria-label="Toggle navigation" aria-expanded={sidebar()} variant="ghost" onClick={()=>setSidebar(!sidebar())}>☰</Button><span class="window-title" title={sessions().find(s=>s.id===session())?.title||'New session'}>Photo Studio <span class="muted"> / {sessions().find(s=>s.id===session())?.title||'New session'}</span></span><div class="state" role="status"><Show when={busy()} fallback={<span class="dot"/>}><Spinner/></Show>{jobLabel().slice(0,65)}</div></header>
       <Show when={error()}><div role="alert" class="error">{error()}<Button aria-label="Dismiss error" onClick={()=>setError('')}>×</Button></div></Show>
       <Show when={busy()}><div class="job-bar"><span>{jobLabel().slice(0,140)}</span><Button onClick={()=>guard(async()=>{const r=await api.call('cancel');setJobLabel(r.message)})}>Stop safely</Button></div></Show>
       <Show when={tab()==='studio'}>

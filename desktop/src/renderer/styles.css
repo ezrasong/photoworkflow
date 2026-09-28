@@ -9,12 +9,12 @@ small{display:block;font-size:11px;color:var(--muted)}.muted{font-size:12px;colo
 h1,h2,h3{font-weight:500}h2{font-size:16px}h3{font-size:13px}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}code{font-size:11px;overflow-wrap:anywhere}
 .sidebar-shell{display:flex;flex-shrink:0;padding-top:40px;position:relative;min-height:0}
 .sidebar-shell:before{content:'';position:absolute;top:0;height:40px;width:100%;app-region:drag}
-[data-component=sidebar-rail]{width:56px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:12px 0;background:var(--background-base);overflow:auto;gap:16px}
+[data-component=sidebar-rail]{width:64px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:12px 0;background:var(--background-base);overflow:auto;gap:16px}
 .rail-projects{display:flex;flex-direction:column;gap:12px}.sidebar-panel{width:224px;min-height:0;overflow:auto}
-.sidebar{display:flex;flex-direction:column;gap:12px;width:100%;min-height:min-content;padding:12px;background:var(--background-base);border-right:1px solid var(--border)}
-.sidebar>*{flex-shrink:0}.brand{font-size:14px;font-weight:600;padding:0 8px 12px}.sidebar h2{font-size:12px;color:var(--muted);padding-left:8px;margin:8px 0}.sidebar input{font-size:12px}
+.sidebar{display:flex;flex-direction:column;gap:12px;width:100%;min-height:0;padding:12px;background:var(--background-base);border-right:1px solid var(--border)}
+.sidebar>*{flex-shrink:0}.sidebar>.session-list{flex-shrink:1}.brand{font-size:14px;font-weight:600;padding:0 8px 12px}.sidebar h2{font-size:12px;color:var(--muted);padding-left:8px;margin:8px 0}.sidebar input{font-size:12px}
 .nav{display:grid;gap:4px}.nav button{justify-content:flex-start}.nav span{margin-left:auto}
-.session-list{flex:1 0 auto;display:flex;flex-direction:column;gap:4px}.session-list button{justify-content:flex-start;min-height:45px;flex-shrink:0;flex-wrap:wrap;height:auto;text-align:left;white-space:normal;overflow-wrap:anywhere}.session-title{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:100%}.session-list small{width:100%;text-align:left}
+.session-list{flex:1;min-height:80px;overflow:auto;display:flex;flex-direction:column;gap:4px}.session-list button{justify-content:flex-start;min-height:45px;flex-shrink:0;flex-wrap:wrap;height:auto;text-align:left;white-space:normal;overflow-wrap:anywhere}.session-title{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:100%}.session-list small{width:100%;text-align:left}
 .active{background:var(--surface-base-active)!important}.local{font-size:11px;padding:12px 4px;color:var(--muted);border-top:1px solid var(--border)}.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--icon-success-base);margin-right:6px;flex-shrink:0}
 main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;container-type:inline-size}
 header{min-height:40px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 150px 0 8px;border-bottom:1px solid var(--border);font-size:12px;app-region:drag}
@@ -22,7 +22,7 @@ header button{app-region:no-drag;flex-shrink:0}.window-title{min-width:0;white-s
 .studio{display:flex;flex:1;min-height:0;background:var(--surface);border-top-left-radius:8px}
 .conversation{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;overflow:auto}
 .selection{padding:12px 20px;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--border);flex-wrap:wrap;flex-shrink:0}.selection>div{flex:1 1 180px;min-width:0}.selection strong{font-size:12px;display:block}.selection small{white-space:nowrap;text-overflow:ellipsis;overflow:hidden;max-width:100%}.selection button{flex-shrink:0;font-size:11px}
-.messages{padding:24px 28px;flex:1 0 120px;overflow:auto;min-height:120px}.welcome{padding:40px 0;max-width:620px;margin:auto}.welcome h2{font-size:22px;letter-spacing:-.5px;margin-bottom:8px}.welcome p{color:var(--muted)}.welcome>p:last-child{margin-top:24px;max-width:420px}
+.messages{padding:24px 28px;flex:1 1 120px;overflow:auto;min-height:120px}.welcome{padding:40px 0;max-width:620px;margin:auto}.welcome h2{font-size:22px;letter-spacing:-.5px;margin-bottom:8px}.welcome p{color:var(--muted)}.welcome>p:last-child{margin-top:24px;max-width:420px}
 .suggestions{display:grid;gap:0;margin:20px 0}.suggestions button{height:auto;min-height:32px;padding:8px 0;white-space:normal;text-align:left;justify-content:flex-start;font-size:12px;font-weight:400}
 .message{margin-bottom:26px}.message>span{font-size:11px;color:var(--muted)}.message p{white-space:pre-wrap;font-size:14px}.message.user{border:1px solid var(--border);border-radius:8px;padding:12px 16px;background:var(--background-base)}.message details{font-size:12px}
 .composer{margin:8px 20px 20px;border:1px solid var(--border);border-radius:8px;padding:12px;background:var(--background-base);flex-shrink:0}.composer textarea{border:0;min-height:64px;max-height:40vh;background:transparent;resize:vertical}.composer>div{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.composer button{font-size:11px}.composer span{margin-left:auto;font-size:10px;color:var(--muted)}
@@ -53,8 +53,12 @@ textarea,input,select{font:inherit;background:var(--background-base);color:var(-
  .state{display:none}.selection,.details{padding:12px}.messages{padding:12px 16px}.composer{margin:8px 12px 12px}.welcome{padding:16px 0}
 }
 @media(max-width:1100px){
- .sidebar-shell{display:none}.app[data-navigation=true] .sidebar-shell{display:flex;width:100%}.app[data-navigation=true] main{display:none}.sidebar-panel{width:auto;flex:1}.sidebar{min-height:min-content}
+ .sidebar-panel{width:200px}
+ .app[data-navigation=true] main{display:none}
+ .app[data-navigation=true] .sidebar-shell{width:100%}
+ .app[data-navigation=true] .sidebar-panel{width:auto;flex:1}
 }
+@media(max-width:500px){[data-component=sidebar-rail]{width:44px}}
 @media(max-height:650px){.messages{flex:1 0 100px;min-height:100px}.welcome{padding:12px 0}.composer{padding:8px}.composer textarea{min-height:48px}.selection{padding-block:8px}}
 @keyframes pulse-opacity{50%{opacity:.2}}@keyframes pulse-opacity-dim{50%{opacity:.1}}@media(prefers-reduced-motion:reduce){*{animation:none!important}}
 /* Quiet controls reserve emphasis for actions and keyboard focus. */

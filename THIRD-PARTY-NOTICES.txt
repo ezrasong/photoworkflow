@@ -1,4 +1,4 @@
-Luma Atelier incorporates modified OpenCode desktop and UI source under MIT.
+Photo Studio incorporates modified OpenCode desktop and UI source under MIT.
 Copyright (c) 2026 Anomaly. Full notice: desktop/vendor/opencode/LICENSE.
 Pinned upstream and adaptation map: desktop/UPSTREAM.md.
 

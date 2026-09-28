@@ -21,7 +21,7 @@ class SetupTests(unittest.TestCase):
                  for name in ('runtime','assistant','photo','legacy','obsidian')}
         events=[];order=[]
         with tempfile.TemporaryDirectory() as directory:
-            root=Path(directory);marker=root/'cancel'
+            root=Path(directory).resolve();marker=root/'cancel'
             # All orchestration is real; network, archive and platform boundaries are fixtures.
             (root/'apps/Obsidian').mkdir(parents=True)
             (root/'apps/Obsidian/Obsidian.exe').touch()

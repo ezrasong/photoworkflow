@@ -13,7 +13,7 @@ def kernel():
     if 'selective_scan_cuda' not in sys.modules:
         path = ROOT / 'apps/mamba-scan-build/selective_scan_cuda.pyd'
         if not path.is_file():
-            raise RuntimeError('MambaIRv2 CUDA kernel is missing. Repair the Luma Atelier installation; no runtime compiler is required.')
+            raise RuntimeError('MambaIRv2 CUDA kernel is missing. Repair the Photo Studio installation; no runtime compiler is required.')
         spec = importlib.util.spec_from_file_location('selective_scan_cuda', path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)

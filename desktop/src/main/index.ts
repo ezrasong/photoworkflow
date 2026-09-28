@@ -22,7 +22,7 @@ const allowed=new Set(['status','results','cancel','setup','session','prompt','s
 function inside(base:string,path:string){const r=relative(resolve(base),resolve(path));return !r.startsWith('..')&&!isAbsolute(r)}
 function send(method:string,args:any={}) {
   return new Promise<any>((resolve,reject)=>{
-    if(!backend || backend.exitCode!==null){reject(new Error('Photo backend is unavailable. Restart Luma Atelier.'));return}
+    if(!backend || backend.exitCode!==null){reject(new Error('Photo backend is unavailable. Restart Photo Studio.'));return}
     const id=randomUUID();pending.set(id,{resolve,reject})
     backend.stdin.write(JSON.stringify({id,method,args})+'\n',error=>{if(error){pending.delete(id);reject(error)}})
   })
@@ -124,5 +124,5 @@ async function start(){
   })
 }
 if(!app.requestSingleInstanceLock())app.quit()
-else {app.on('second-instance',()=>{win?.show();win?.focus()});void app.whenReady().then(start).catch(error=>{dialog.showErrorBox('Luma Atelier startup failed',String(error));app.quit()})}
+else {app.on('second-instance',()=>{win?.show();win?.focus()});void app.whenReady().then(start).catch(error=>{dialog.showErrorBox('Photo Studio startup failed',String(error));app.quit()})}
 app.on('window-all-closed',()=>app.quit())

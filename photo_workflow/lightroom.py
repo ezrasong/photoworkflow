@@ -137,7 +137,7 @@ def request(operation, selection=None, settings=None, timeout=120, cancel_file=N
                     result['source_encoding'] = source_encoding(result['source'])
                 return result
             time.sleep(.15)
-        raise TimeoutError('Lightroom did not respond. Open Lightroom and enable Luma Atelier in Plug-in Manager. Do not retry an edit until checking its virtual copy.')
+        raise TimeoutError('Lightroom did not respond. Open Lightroom and enable Photo Studio in Plug-in Manager. Do not retry an edit until checking its virtual copy.')
     finally:
         # A queued, unclaimed command must never execute after its caller has gone.
         (folder / 'request.txt').unlink(missing_ok=True)

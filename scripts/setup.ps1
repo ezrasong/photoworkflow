@@ -18,4 +18,4 @@ if ($LASTEXITCODE -ne 0) { throw 'Model download or integrity check failed' }
 if ($LASTEXITCODE -ne 0) { throw 'Local assistant installation or integrity check failed' }
 & "$PSScriptRoot\setup_obsidian.ps1"
 if ($LASTEXITCODE -ne 0) { throw 'Obsidian setup failed' }
-Write-Host 'Ready. Double-click Launch Luma Atelier.cmd, or run .\run.ps1 single <image>.'
+Write-Host 'Ready. Double-click Launch Photo Studio.cmd, or run .\run.ps1 single <image>.'

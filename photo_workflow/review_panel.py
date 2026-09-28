@@ -104,7 +104,7 @@ class ReviewPanel:
         self.report = json.loads(self.report_path.read_text(encoding='utf-8'))
         self.items = [item for item in self.report['files'] if item['status'] == 'passed']
         if not self.items: raise ValueError('No completed photos to review')
-        window.title('Luma Atelier — Before & After')
+        window.title('Photo Studio — Before & After')
         window.geometry('1280x820'); window.minsize(820, 560)
         self.index = 0; self.pixels = []; self.images = []; self.center = [.5, .5]
         self.mode = tk.StringVar(value='Fit')

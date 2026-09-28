@@ -1,9 +1,9 @@
 {
   "name": "photo-workflow",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "description": "Private local photo editing, restoration and review",
-  "author": "Luma Atelier contributors",
+  "author": "Photo Studio contributors",
   "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
@@ -30,8 +30,8 @@
   },
   "build": {
     "appId": "local.photoworkflow.desktop",
-    "productName": "Luma Atelier",
-    "artifactName": "LumaAtelier-${version}-${arch}-Setup.${ext}",
+    "productName": "Photo Studio",
+    "artifactName": "PhotoStudio-${version}-${arch}-Setup.${ext}",
     "directories": {
       "output": "dist"
     },

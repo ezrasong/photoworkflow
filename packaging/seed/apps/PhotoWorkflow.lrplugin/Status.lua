@@ -1,1 +1,1 @@
-import('LrDialogs').message('Luma Atelier', _G.PhotoWorkflowRunning and 'Ready. Select ONE photo, then use Chat with Photo Assistant in the workspace. Edits create virtual copies.' or 'Bridge stopped. Reload this plug-in in Plug-in Manager.')
+import('LrDialogs').message('Photo Studio', _G.PhotoWorkflowRunning and 'Ready. Select ONE photo, then use Chat with Photo Assistant in the workspace. Edits create virtual copies.' or 'Bridge stopped. Reload this plug-in in Plug-in Manager.')

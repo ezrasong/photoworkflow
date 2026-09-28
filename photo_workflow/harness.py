@@ -17,13 +17,13 @@ class App:
     def __init__(self, window):
         local_runtime(); initialize()
         self.window = window
-        window.title('Luma Atelier'); window.geometry('960x700')
+        window.title('Photo Studio'); window.geometry('960x700')
         self.events = queue.Queue(); self.process = None; self.busy = False; self.cancel_file = None
         self.path = tk.StringVar(); self.mode = tk.StringVar(value='single')
         self.scale = tk.StringVar(value='1'); self.depth = tk.StringVar(value='16'); self.blend = tk.DoubleVar(value=.35)
         self.subject = tk.StringVar(value='No person mapping'); self.jobs = []
         root = ttk.Frame(window, padding=16); root.pack(fill='both', expand=True)
-        ttk.Label(root, text='Luma Atelier', font=('Segoe UI', 18)).pack(anchor='w')
+        ttk.Label(root, text='Photo Studio', font=('Segoe UI', 18)).pack(anchor='w')
         ttk.Button(root, text='Edit file / folder with a prompt (native Adobe)', command=self.native_batch).pack(anchor='w', pady=8)
         ttk.Button(root, text='Open editor / local assistant', command=self.editor).pack(anchor='w', pady=8)
         ttk.Button(root, text='Oh My Pi chat: path + editing prompt', command=self.chat).pack(anchor='w', pady=4)

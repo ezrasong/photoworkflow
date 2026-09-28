@@ -5,11 +5,11 @@ Repository: https://github.com/anomalyco/opencode
 Pinned commit: `b471c2b4495747353af768fbf2e0790c9d820ce2` (inspected September 27, 2026).
 The selected packages/desktop/package.json identifies Electron 42.3.3,
 SolidJS, electron-vite 5 and electron-builder 26.15.2; its builder uses Windows
-NSIS. Luma Atelier updates Electron to 42.11.8, Solid to 1.9.15 and Vite to
+NSIS. Photo Studio updates Electron to 42.11.8, Solid to 1.9.15 and Vite to
 7.3.6 after dependency audit found advisories in earlier pins. The exact graph
 is committed in package-lock.json.
 
-| OpenCode source | Luma Atelier adaptation |
+| OpenCode source | Photo Studio adaptation |
 | --- | --- |
 | packages/desktop/src/main/windows.ts | src/main/windows.ts retains BrowserWindow lifecycle, saved state, sandbox/isolation, custom renderer protocol, bounded file resolution, ready-to-show and navigation policy. Removes WSL, coding server, telemetry and unrelated platform code. Original snapshot under vendor/opencode/windows.ts. |
 | packages/desktop/electron.vite.config.ts | Main/preload/renderer build boundaries and CJS preload; original snapshot retained. |

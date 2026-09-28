@@ -5,11 +5,11 @@ const assert=require('node:assert/strict')
 const root=resolve(__dirname,'../..')
 ;(async()=>{
  const env={...process.env,PHOTOWORKFLOW_HOME:join(root,'.cache/browser-acceptance-'+Date.now())};delete env.ELECTRON_RUN_AS_NODE
- const app=await electron.launch({executablePath:join(root,'desktop/dist/win-unpacked/Luma Atelier.exe'),env})
+ const app=await electron.launch({executablePath:join(root,'desktop/dist/win-unpacked/Photo Studio.exe'),env})
  try{
  const page=await app.firstWindow();await page.waitForFunction(()=>window.photo);page.on('pageerror',console.error);await page.evaluate(()=>{window.browserEvents=[];window.photo.events(e=>{if(e.type==='browser')window.browserEvents.push(e)})});await page.getByRole('button',{name:'Install / repair complete setup',exact:true}).waitFor();console.log('Browser test ready')
  await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].setContentSize(1440,960))
- await page.getByRole('button',{name:'Toggle navigation',exact:true}).click()
+ if(!await page.getByRole('button',{name:'Studio',exact:true}).isVisible())await page.getByRole('button',{name:'Toggle navigation',exact:true}).click()
  await page.getByRole('button',{name:'Studio',exact:true}).click()
  await page.getByRole('tab',{name:'Browser',exact:true}).click()
  await page.getByLabel('Browser address').fill('https://en.wikipedia.org/wiki/Photography')

@@ -71,7 +71,7 @@ JSX = r'''
    source=null;
   }
   if(!source){source=app.open(file);opened=true;}
-  doc=source.duplicate('Luma Atelier local corrections',true);
+  doc=source.duplicate('Photo Studio local corrections',true);
   if(opened){source.close(SaveOptions.DONOTSAVECHANGES);source=null;}
   app.activeDocument=doc;
   if(doc.bitsPerChannel!=BitsPerChannelType.SIXTEEN || doc.mode!=DocumentMode.RGB)throw Error('Expected 16-bit RGB');

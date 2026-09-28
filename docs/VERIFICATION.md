@@ -3,6 +3,28 @@
 Windows x64 verification, September 27–28, 2026. Tests used synthetic images;
 private photographs and notes were not uploaded.
 
+## Version 0.1.4 — Photo Studio
+
+The simpler product name replaces Luma Atelier. Wide windows again open with the
+familiar navigation sidebar and split chat/controls view; the icon rail remains
+available in narrower views. The 640×480 Windows minimum remains enforced.
+A CI-only test fixture failure caused by an unresolved Windows short temporary
+path was fixed by resolving the fixture root, preserving production validation.
+
+- Rebuilt the redistributable Python backend and NSIS installer. TypeScript/Vite,
+  desktop bridge tests, all 13 focused Python tests, major-editing boundaries and
+  npm audit passed (zero advisories).
+- Repeated the six-size layout matrix, effective 100–200% scaling and separate
+  enlarged-text checks. Native Windows computer-use checks inspected wide,
+  portrait and short layouts, navigation, scrolling and the file dialog.
+  Attempting a smaller window clamped to the 640×480 minimum; the composer and
+  Controls & review switch remained reachable, including the lower controls.
+- Repeated packaged empty-workspace smoke and public-browser isolation checks.
+  Browser bounds passed all six sizes at actual Electron zoom 1, 1.25, 1.5 and 2.
+  Smoke verified synthetic tone/focus output, original preservation, cancellation,
+  review, missing-dependency errors and settings/results after restart with
+  developer Python/Node removed from PATH.
+
 ## Version 0.1.3 — Luma Atelier
 
 - TypeScript/Vite build, desktop bridge test, 13 Python unit tests, existing
