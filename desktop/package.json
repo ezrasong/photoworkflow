@@ -1,6 +1,6 @@
 {
   "name": "photo-workflow",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
   "description": "Private local photo editing, restoration and review",
   "author": "Photo Studio contributors",
