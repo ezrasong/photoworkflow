@@ -56,6 +56,58 @@ SectionEnd
   }
   checks.push({childExit:expected,installerExit:result.status,finished})
  }
+ // Compile and execute electron-builder's actual data-removal block and our
+ // updater hook. Redirect shell-folder constants into fixtures, never real AppData.
+ const config=require('../package.json')
+ assert.equal(config.build.nsis.deleteAppDataOnUninstall,true)
+ const template=await fs.readFile(path.join(root,'desktop/node_modules/app-builder-lib/templates/nsis/uninstaller.nsh'),'utf8')
+ const cleanup=template.slice(template.indexOf('  Var /GLOBAL isDeleteAppData'),template.indexOf('  DeleteRegKey SHELL_CONTEXT'))
+ assert.ok(cleanup.includes('RMDir /r "$APPDATA\\${APP_PACKAGE_NAME}"'))
+ const sandbox=source=>source.replaceAll('$APPDATA','$sandboxRoaming').replaceAll('$LOCALAPPDATA','$sandboxLocal')
+ const hooks=await fs.readFile(path.join(root,'desktop/resources/installer.nsh'),'utf8')
+ await fs.writeFile(path.join(out,'sandbox-hooks.nsh'),sandbox(hooks))
+ for(const updated of [false,true]){
+  const dir=path.join(out,updated?'upgrade':'uninstall'),roaming=path.join(dir,'roaming'),local=path.join(dir,'local')
+  const owned=[path.join(roaming,config.name,'Workspace/models/model.gguf'),path.join(roaming,config.name,'Workspace/runtime/library.bin'),path.join(roaming,config.name,'Workspace/outputs/result.tif'),path.join(roaming,config.name,'Workspace/Photo Vault/note.md'),path.join(roaming,'Photo Studio','Cache/cache.bin'),path.join(local,'photo-workflow-updater/installer.exe')]
+  const preserved=[path.join(dir,'original-photo.jpg'),path.join(dir,'custom-workspace/model.gguf'),path.join(roaming,'another-app/keep.txt')]
+  for(const file of [...owned,...preserved]){await fs.mkdir(path.dirname(file),{recursive:true});await fs.writeFile(file,'fixture')}
+  const writer=path.join(dir,'write-uninstaller.exe'),uninstaller=path.join(dir,'uninstall.exe')
+  await compile('uninstall-'+updated,`
+!include "LogicLib.nsh"
+!include "FileFunc.nsh"
+!define DELETE_APP_DATA_ON_UNINSTALL
+!define APP_FILENAME "Photo Studio"
+!define APP_PRODUCT_FILENAME "Photo Studio"
+!define APP_PACKAGE_NAME "${config.name}"
+!define isUpdated '$testUpdated == "1"'
+!include "${path.join(out,'sandbox-hooks.nsh')}"
+OutFile "${writer}"
+RequestExecutionLevel user
+SilentInstall silent
+SilentUnInstall silent
+Var testUpdated
+Var installMode
+Var sandboxRoaming
+Var sandboxLocal
+Section
+ WriteUninstaller "${uninstaller}"
+SectionEnd
+Section "Uninstall"
+ StrCpy $testUpdated "${updated?1:0}"
+ StrCpy $installMode "current"
+ StrCpy $sandboxRoaming "${roaming}"
+ StrCpy $sandboxLocal "${local}"
+ !insertmacro customUnInstall
+ ${sandbox(cleanup)}
+SectionEnd
+`)
+  for(const [exe,args] of [[writer,['/S']],[uninstaller,['/S','_?='+dir]]]){
+   const result=spawnSync(exe,args,{windowsHide:true,timeout:30000});assert.equal(result.error,undefined);assert.equal(result.status,0,result.stdout+result.stderr)
+  }
+  for(const file of owned)assert.equal(await fs.stat(file).then(()=>true,()=>false),updated,file)
+  for(const file of preserved)assert.equal(await fs.readFile(file,'utf8'),'fixture')
+  checks.push({updated,workspaceAndUpdaterRemoved:!updated,externalFilesPreserved:true})
+ }
  await fs.writeFile(path.join(out,'report.json'),JSON.stringify({status:'passed',checks},null,2))
- console.log('Installer completion, failure, cancellation and missing-runtime gates passed:',out)
+ console.log('Installer gates, real NSIS workspace/updater removal and upgrade preservation passed:',out)
 })().catch(error=>{console.error(error);process.exitCode=1})

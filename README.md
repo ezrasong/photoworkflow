@@ -56,8 +56,12 @@ and correction strength, and compare at 100%. Local deconvolution can improve
 recoverable softness; it cannot reliably recover severe defocus or motion blur.
 
 Photos, outputs, models, notes and settings live in a separate AppData workspace.
-Originals and existing results are preserved. Upgrades and uninstall preserve user
-work. Back up the workspace separately. No photo or private note upload is part of
+Editing preserves originals and existing results. Upgrades preserve the workspace.
+Uninstall removes the default AppData workspace, including downloaded models,
+runtime, sessions, results, Photo Vault notes and settings, plus the updater cache.
+Back up anything you want to keep before uninstalling. Original files outside the
+workspace and custom workspaces set with `PHOTOWORKFLOW_HOME` are left in place.
+No photo or private note upload is part of
 processing; installation and explicit reference retrieval are separate operations.
 
 ## Requirements and limits

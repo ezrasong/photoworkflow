@@ -12,6 +12,7 @@
     "package": "npm run build && electron-builder --win nsis --x64 --publish never",
     "smoke": "node scripts/smoke.cjs",
     "test:layout": "node scripts/layout-acceptance.cjs",
+    "test:ui": "node scripts/ui-acceptance.cjs",
     "test:installer": "node scripts/installer-gates.cjs"
   },
   "dependencies": {
@@ -65,7 +66,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "deleteAppDataOnUninstall": false,
+      "deleteAppDataOnUninstall": true,
       "include": "resources/installer.nsh"
     },
     "publish": [

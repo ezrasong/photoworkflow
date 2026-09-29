@@ -1,6 +1,6 @@
-import { createSignal, onMount, onCleanup } from 'solid-js'
+import { createEffect, createSignal, onMount, onCleanup } from 'solid-js'
 import { Button } from '../upstream/button'
-export function BrowserPanel(){
+export function BrowserPanel(props:{suspended?:boolean}){
   const [url,setURL]=createSignal('https://en.wikipedia.org/wiki/Photography'),[error,setError]=createSignal('')
   const [state,setState]=createSignal<any>({})
   let host!:HTMLDivElement
@@ -19,10 +19,12 @@ export function BrowserPanel(){
           if(style.overflowY!=='visible'){top=Math.max(top,clip.top);bottom=Math.min(bottom,clip.bottom)}
         }
         const width=right-left,height=bottom-top
-        if(!host.checkVisibility()||width<1||height<1)void window.photo.browser('hide')
+        if(props.suspended||!host.checkVisibility()||width<1||height<1)void window.photo.browser('hide')
         else void action('bounds',{x:left,y:top,width,height})
       })
     }
+    // Native web contents paint above DOM menus; keep the tab picker unobstructed.
+    createEffect(()=>{if(props.suspended)void window.photo.browser('hide');else bounds()})
     const resize=new ResizeObserver(bounds)
     resize.observe(host)
     window.addEventListener('resize',bounds)

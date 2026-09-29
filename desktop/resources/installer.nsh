@@ -21,3 +21,16 @@
   Pop $1
   Pop $0
 !macroend
+
+; electron-builder removes the installed program and the per-user AppData
+; workspace via deleteAppDataOnUninstall. Its update uninstaller preserves data.
+; The downloaded updater payload lives separately under LocalAppData.
+!macro customUnInstall
+  ${IfNot} ${isUpdated}
+    SetShellVarContext current
+    RMDir /r "$LOCALAPPDATA\photo-workflow-updater"
+    ${If} $installMode == "all"
+      SetShellVarContext all
+    ${EndIf}
+  ${EndIf}
+!macroend

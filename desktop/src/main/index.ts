@@ -20,6 +20,7 @@ const pending=new Map<string,{resolve:(value:any)=>void,reject:(error:Error)=>vo
 const resources=app.isPackaged?join(process.resourcesPath,'backend'):resolve(__dirname,'../../../.cache/packaging/bundle')
 let home=process.env.PHOTOWORKFLOW_HOME || join(app.getPath('userData'),'Workspace')
 const allowed=new Set(['status','results','cancel','setup','mcp_check','session','prompt','suggest','select','process','export','panel','person','settings','review','obsidian','references'])
+const photoExtensions=['jpg','jpeg','png','tif','tiff','heic','heif','dng','arw','cr2','cr3','nef','nrw','raf','orf','rw2','pef']
 function inside(base:string,path:string){const r=relative(resolve(base),resolve(path));return !r.startsWith('..')&&!isAbsolute(r)}
 function send(method:string,args:any={}) {
   return new Promise<any>((resolve,reject)=>{
@@ -28,9 +29,15 @@ function send(method:string,args:any={}) {
     backend.stdin.write(JSON.stringify({id,method,args})+'\n',error=>{if(error){pending.delete(id);reject(error)}})
   })
 }
-async function authorizePath(path:unknown) {
+async function authorizePath(path:unknown,kind?:string) {
   if(typeof path!=='string'||path.length>32767||path.startsWith('\\\\')||!isAbsolute(path))throw new Error('Choose a local file or folder')
   const actual=await fs.realpath(path)
+  if(actual.startsWith('\\\\'))throw new Error('Choose a local file or folder')
+  if(kind==='photo'||kind==='folder'||kind==='drop'||kind==='references'){
+    const stat=await fs.stat(actual)
+    const extensions=kind==='references'?['png','jpg','jpeg','tif','tiff']:photoExtensions
+    if(!(stat.isDirectory()&&['folder','drop'].includes(kind))&&!(stat.isFile()&&kind!=='folder'&&extensions.includes(extname(actual).slice(1).toLowerCase())))throw new Error('Choose a supported local photo'+(kind==='references'?' (JPEG, PNG or TIFF)':' or folder'))
+  }
   selected.add(actual.toLowerCase());return actual
 }
 async function permitted(path:unknown) {
@@ -87,24 +94,27 @@ async function start(){
     validateCaller(event)
     if(closing)throw new Error('Photo Studio is closing')
     if(!allowed.has(method)||!args||typeof args!=='object'||JSON.stringify(args).length>64000)throw new Error('Unsupported request')
-    if(method==='select'){if(!Array.isArray(args.paths)||args.paths.length>4)throw new Error('Invalid selection');args.paths=await Promise.all(args.paths.map(permitted))}
+    if(method==='select'){if(busy)throw new Error('Cannot change selection during a job');if(!Array.isArray(args.paths)||!args.paths.length||args.paths.length>4||(args.kind==='photo'&&args.paths.length!==1))throw new Error('Invalid selection');args.paths=await Promise.all(args.paths.map(permitted))}
     if(method==='process')args.source=await permitted(args.source)
     if(method==='export'||method==='review')args.path=await permitted(args.path)
     if(['process','setup','mcp_check','prompt','export','suggest','references'].includes(method))busy=true
     try{
       const result=await send(method,args)
       if(method==='session'&&result.source)await authorizePath(result.source)
+      if(['session','references'].includes(method)&&Array.isArray(result.references))await Promise.all(result.references.map((path:unknown)=>authorizePath(path,'references')))
       return result
     }catch(error){if(method==='prompt')busy=false;throw error}finally{if(['process','setup','mcp_check','export','suggest','references'].includes(method))busy=false}
   })
   ipcMain.handle('photo:pick',async(event,kind)=>{
     validateCaller(event)
+    if(busy||closing)throw new Error('Wait for the current job before changing input')
     if(!['photo','folder','notes','references','recipe'].includes(kind))throw new Error('Invalid picker')
     const result=await dialog.showOpenDialog(win,{properties:kind==='folder'?['openDirectory']:kind==='references'||kind==='notes'?['openFile','multiSelections']:['openFile'],
-      filters:kind==='notes'?[{name:'Vault notes',extensions:['md']}]:kind==='recipe'?[{name:'Recipe',extensions:['json']}]:[{name:'Photos',extensions:['jpg','jpeg','png','tif','tiff','heic','heif','dng','arw','cr2','cr3','nef','raf','orf','rw2','pef']}]})
-    return Promise.all(result.filePaths.map(authorizePath))
+      filters:kind==='notes'?[{name:'Vault notes',extensions:['md']}]:kind==='recipe'?[{name:'Recipe',extensions:['json']}]:[{name:'Photos',extensions:kind==='references'?['jpg','jpeg','png','tif','tiff']:photoExtensions}]})
+    if(busy||closing)throw new Error('Wait for the current job before changing input')
+    return Promise.all(result.filePaths.map(path=>authorizePath(path,kind)))
   })
-  ipcMain.handle('photo:drop',async(event,paths)=>{validateCaller(event);if(!Array.isArray(paths)||paths.length!==1)throw new Error('Drop one photo or folder');return Promise.all(paths.map(authorizePath))})
+  ipcMain.handle('photo:drop',async(event,paths)=>{validateCaller(event);if(busy||closing)throw new Error('Wait for the current job before changing input');if(!Array.isArray(paths)||paths.length!==1)throw new Error('Drop one photo or folder at a time');return [await authorizePath(paths[0],'drop')]})
   ipcMain.handle('photo:preview',async(event,path,full=false)=>{
     validateCaller(event);const actual=await permitted(path)
     if(typeof full!=='boolean')throw new Error('Invalid preview mode')

@@ -63,7 +63,7 @@ async function close(){
   execFileSync(join(resources,'python/python.exe'),['-c',`import tifffile; a=tifffile.imread(${JSON.stringify(join(jobs[0].path,'composite.tif'))}); assert str(a.dtype)=='uint16'; assert a.shape==(128,192,3)`],{windowsHide:true})
   evidence.checks.push('Synthetic tone edit publishes 16-bit TIFF and preserves exact original bytes')
   const image=await page.evaluate(p=>window.photo.preview(p),join(jobs[0].path,'composite.tif'));assert.ok(image.startsWith('data:image/png;base64,'))
-  await page.getByRole('tab',{name:'Results',exact:true}).click()
+  await page.locator('.detail-shell').getByRole('tab',{name:'Results',exact:true}).click()
   await page.getByRole('button',{name:new RegExp(jobs[0].name)}).click()
   await page.getByAltText('Local before and after photo comparison').waitFor()
   await page.getByRole('button',{name:'100% pixels',exact:true}).click()

@@ -281,7 +281,7 @@ class Desktop:
             try:
                 result=choose_references(self.workspace, '')
                 self.save_workspace()
-                return result
+                return {**result, 'references':[str(p) for p in self.workspace.references]}
             finally:
                 with self.guard:self.busy=False
         if method=='suggest':
@@ -317,7 +317,7 @@ class Desktop:
                 self.start_chat(identity)
             if not metadata.exists(): json_write(metadata,{'id':identity,'title':str(args.get('title') or 'Photo session')[:120],'updated':time.time()})
             events=path/'events.jsonl'
-            return {'id':identity,'source':str(self.workspace.selected_input or ''), 'events':[json.loads(l) for l in events.read_text(encoding='utf-8').splitlines()] if events.exists() else []}
+            return {'id':identity,'source':str(self.workspace.selected_input or ''), 'references':[str(p) for p in self.workspace.references], 'events':[json.loads(l) for l in events.read_text(encoding='utf-8').splitlines()] if events.exists() else []}
         if method=='prompt':
             prompt=args.get('text')
             if not isinstance(prompt,str) or not 1<=len(prompt.strip())<=6000 or prompt.lstrip().startswith('/'):
@@ -394,11 +394,23 @@ class Desktop:
             return {'id':add_person(args.get('name',''))}
         if method=='settings':
             path=ROOT/'desktop/settings.json'
-            if 'value' in args:
-                value=args['value']
-                if not isinstance(value,dict) or set(value)-{'theme','reviewZoom'} or value.get('theme','dark') not in ('dark','light') or value.get('reviewZoom','fit') not in ('fit','100%'): raise ValueError('Invalid settings')
-                json_write(path,value)
-            return json.loads(path.read_text()) if path.exists() else {'theme':'dark','reviewZoom':'fit'}
+            with self.guard:
+                current=json.loads(path.read_text()) if path.exists() else {'theme':'dark','reviewZoom':'fit'}
+                if 'value' in args:
+                    value=args['value']
+                    if not isinstance(value,dict) or set(value)-{'theme','reviewZoom','detailTabs'} or value.get('theme','dark') not in ('dark','light') or value.get('reviewZoom','fit') not in ('fit','100%'): raise ValueError('Invalid settings')
+                    if 'detailTabs' in value:
+                        tabs=value['detailTabs']; destinations={'controls','review','prompts','browser'}
+                        if not isinstance(tabs,dict) or set(tabs)!={'order','hidden','active'}:raise ValueError('Invalid sidebar tabs')
+                        order,hidden,active=tabs['order'],tabs['hidden'],tabs['active']
+                        if not isinstance(order,list) or len(order)!=len(destinations) or any(not isinstance(x,str) for x in order) or set(order)!=destinations:raise ValueError('Invalid tab order')
+                        if not isinstance(hidden,list) or any(not isinstance(x,str) for x in hidden) or len(set(hidden))!=len(hidden) or not set(hidden)<=destinations:raise ValueError('Invalid hidden tabs')
+                        if active is not None and (not isinstance(active,str) or active not in destinations-set(hidden)):raise ValueError('Invalid active tab')
+                        if (active is None)!=(len(hidden)==len(destinations)):raise ValueError('Choose a visible tab')
+                    current.pop('sidebarTabs', None)
+                    current.update(value)
+                    json_write(path,current)
+                return current
         raise ValueError('Unsupported desktop command')
 
 

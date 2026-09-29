@@ -22,7 +22,7 @@ async function fixture(){
  if(method==='suggest'){listener({type:'prompt_suggestions',source,summary:long,prompts:[long,long]});return {}};
  return {};
  }});`)
- await fs.writeFile(path.join(out,'main.cjs'),`const {app,BrowserWindow}=require('electron');app.whenReady().then(()=>{const w=new BrowserWindow({width:1280,height:720,webPreferences:{preload:${JSON.stringify(path.join(out,'preload.cjs'))},contextIsolation:true,nodeIntegration:false,sandbox:false}});w.loadFile(${JSON.stringify(path.join(root,'desktop/out/renderer/index.html'))})});app.on('window-all-closed',()=>app.quit());`)
+ await fs.writeFile(path.join(out,'main.cjs'),`const {app,BrowserWindow}=require('electron');const profile=${JSON.stringify(path.join(out,'profile'))};require('node:fs').mkdirSync(profile,{recursive:true});app.setPath('userData',profile);app.setPath('sessionData',profile);app.whenReady().then(()=>{const w=new BrowserWindow({width:1280,height:720,webPreferences:{preload:${JSON.stringify(path.join(out,'preload.cjs'))},contextIsolation:true,nodeIntegration:false,sandbox:false}});w.loadFile(${JSON.stringify(path.join(root,'desktop/out/renderer/index.html'))})});app.on('window-all-closed',()=>app.quit());`)
 }
 async function settle(page){await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))))}
 async function noOverflow(page,label){
@@ -90,7 +90,7 @@ async function details(page){const button=page.getByRole('button',{name:'Control
   await reachable(page.getByLabel('Photo instructions'));await page.getByLabel('Photo instructions').fill('A long instruction '.repeat(100));await reachable(page.getByRole('button',{name:'Send ↑',exact:true}));
   await composerRow(page,label);await noOverflow(page,label+' conversation');await details(page)
   await page.getByRole('tab',{name:'Photo controls',exact:true}).click();await reachable(page.getByRole('button',{name:'Apply manual operation',exact:true}));await noOverflow(page,label+' controls')
-  await page.getByRole('tab',{name:'Results',exact:true}).click();await page.locator('.result-list button').last().click();
+  await page.locator('.detail-shell').getByRole('tab',{name:'Results',exact:true}).click();await page.locator('.result-list button').last().click();
   await page.getByAltText('Local before and after photo comparison').waitFor();await settle(page)
   const ratio=await page.getByAltText('Local before and after photo comparison').evaluate(e=>{const r=e.getBoundingClientRect();return r.width/r.height});assert.ok(Math.abs(ratio-1.5)<.02,label+' aspect ratio '+ratio)
   await reachable(page.getByRole('button',{name:'100% pixels',exact:true}));await noOverflow(page,label+' review')
@@ -110,5 +110,5 @@ async function details(page){const button=page.getByRole('button',{name:'Control
  }
  assert.deepEqual(errors,[])
  await fs.writeFile(path.join(out,'report.json'),JSON.stringify({status:'passed',checks,scaling:'Effective CSS viewports for display/zoom scaling; separate enlarged-text checks; native zoom tested by browser acceptance',fixture:'Synthetic paths, 24 sessions, long messages, all setup groups and 1200x800 photo',coverage:['setup and actions reachable','conversation composer and send reachable','navigation/session scroll','review aspect ratio','browser and prompts','keyboard tab focus','no document overflow'],errors},null,2))
- }finally{await app.close()}
+ }catch(error){await (await app.firstWindow()).screenshot({path:path.join(out,'failure.png')});throw error}finally{await app.close()}
 })().catch(e=>{console.error(e);process.exitCode=1})
