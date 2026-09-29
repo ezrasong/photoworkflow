@@ -39,7 +39,16 @@ backend.stdin.on('data',async bytes=>{
     result={selected:args.paths}
    }
    if(method==='references'){references=[path.join(home,'reference.png')];result={references,selected_references:1}}
-   if(method==='preview')throw Error('Fixture cannot decode this image')
+   if(method==='suggest'){
+    if(global.fixture.delaySuggest)await new Promise(r=>setTimeout(r,global.fixture.delaySuggest))
+    if(global.fixture.suggestError)throw Error(global.fixture.suggestError)
+    result={source,summary:'Visible shadow noise.',prompts:['Reduce shadow noise gently.']}
+    global.fixture.event({type:'prompt_suggestions',...result})
+   }
+   if(method==='preview'){
+    if(path.basename(args.path)==='sony.ARW')result=require('electron').nativeImage.createFromPath(path.join(home,'first.png')).toDataURL()
+    else throw Error('Fixture cannot decode this image')
+   }
    backend.stdout.write(JSON.stringify({id,result})+'\n')
   }catch(error){backend.stdout.write(JSON.stringify({id,error:error.message})+'\n')}
  }
@@ -52,7 +61,7 @@ const sourceCode=ts.transpileModule(fs.readFileSync(path.join(desktop,'src/main/
 vm.compileFunction(sourceCode,['require','exports','__dirname'])(name=>{
  if(name==='./windows')return windows
  if(name==='./browser')return {referenceBrowser:()=>async(action,args)=>{global.fixture.browser.push({action,args});return true}}
- if(name==='./updates')return {createUpdates:()=>({initialize:async()=>{},command:async()=>({phase:'idle',version:'0.1.7'}),dispose(){}})}
+ if(name==='./updates')return {createUpdates:()=>({initialize:async()=>{},command:async()=>({phase:'idle',connected:true,version:require(path.join(desktop,'package.json')).version}),dispose(){}})}
  if(name==='node:child_process')return {spawn:()=>backend}
  return require(name)
 },{},path.join(desktop,'out/main'))

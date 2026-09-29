@@ -47,8 +47,10 @@ local function write(path, data)
  assert(Files.move(path..'.partial',path))
 end
 local function selected(catalog, id)
- local photos=catalog:getTargetPhotos()
- assert(#photos==1, 'Select exactly one photo in Lightroom')
+ -- With no active photo, getTargetPhotos can return the entire current source.
+ assert(catalog:getTargetPhoto(), 'No photo selected in Lightroom. Select the intended photo, then retry. If it is hidden, open its folder and clear Library filters.')
+ local photos=catalog:getTargetPhotos() or {}
+ assert(#photos==1, 'Select exactly one photo in Lightroom, then retry. If the intended photo is hidden, open its folder and clear Library filters.')
  local photo=photos[1]
  assert(photo:getRawMetadata('fileFormat')~='VIDEO', 'Select a still photograph')
  assert(Files.exists(photo:getRawMetadata('path')), 'Selected source is missing or offline')
@@ -57,6 +59,19 @@ local function selected(catalog, id)
    'Selection or catalog changed; read selection again')
  end
  return photo
+end
+local function selectImported(catalog, photo)
+ -- setSelectedPhotos silently ignores photos outside the active view source.
+ -- The explicit import owns this selection; expose its folder before selecting.
+ local folder=assert(catalog:getFolderByPath(Paths.parent(photo:getRawMetadata('path'))),
+  'Cannot show the imported photo folder. Open it in Lightroom and retry.')
+ catalog:setActiveSources({folder})
+ catalog:setSelectedPhotos(photo,{photo})
+ assert(App.activeCatalog():getPath()==catalog:getPath(), 'Catalog changed; retry in the intended catalog')
+ local actual=selected(catalog)
+ assert(actual.localIdentifier==photo.localIdentifier,
+  'Lightroom did not select the requested photo. Clear Library filters, select the intended photo, then retry.')
+ return actual
 end
 local function describe(photo, token)
  local values={}
@@ -108,8 +123,7 @@ local function execute(req, folder)
   assert(Files.exists(req.source)=='file', 'Source is missing')
   local photo=catalog:findPhotoByPath(req.source)
   if not photo then catalog:withWriteAccessDo('Import requested photo', function() photo=catalog:addPhoto(req.source) end) end
-  catalog:setSelectedPhotos(photo,{photo})
-  return describe(photo,req.token)
+  return describe(selectImported(catalog,photo),req.token)
  end
  if req.operation=='import_fixture' then
   local p=catalog:getPath():gsub('\\','/'):lower()

@@ -18,7 +18,7 @@ import './upstream/icon-button.css'
 import './upstream/tabs.css'
 import './styles.css'
 
-declare global {interface Window {photo:{updates:(action:string,value?:string)=>Promise<any>;call:(method:string,args?:any)=>Promise<any>;pick:(kind:string)=>Promise<string[]>;drop:(files:File[])=>Promise<string[]>;preview:(path:string,full?:boolean)=>Promise<string>;browser:(action:string,args?:any)=>Promise<any>;reveal:(path:string)=>Promise<boolean>;events:(cb:(e:any)=>void)=>()=>void}}}
+declare global {interface Window {photo:{updates:(action:string)=>Promise<any>;call:(method:string,args?:any)=>Promise<any>;pick:(kind:string)=>Promise<string[]>;drop:(files:File[])=>Promise<string[]>;preview:(path:string,full?:boolean)=>Promise<string>;browser:(action:string,args?:any)=>Promise<any>;reveal:(path:string)=>Promise<boolean>;events:(cb:(e:any)=>void)=>()=>void}}}
 const api=window.photo
 const basename=(value:string)=>value.split(/[\\/]/).pop()||value
 const size=(n:number)=>(n/1024**3).toFixed(2)+' GiB'
@@ -111,7 +111,12 @@ function App(){
     else {await api.call('select',{kind,paths});if(kind==='references')setReferences(paths);setSuggestions(null);setActivity(p=>[...p,{type:'context',text:`Selected ${paths.length} ${kind}`}])}
   })
   const send=()=>{if(busy())return;return guard(async()=>{if(!session())throw new Error('Create a session first');setBusy(true);const text=draft();await api.call('prompt',{text});if(draft()===text)setDraft('')})}
-  const suggest=()=>guard(async()=>{setBusy(true);setJobLabel('Inspecting photo for prompt suggestions');await api.call('suggest');setBusy(false);setJobLabel('Suggestions ready');openPanel('prompts')})
+  const suggest=()=>{if(busy())return;return guard(async()=>{
+    setBusy(true);setSuggestions(null);setJobLabel('Inspecting photo for prompt suggestions')
+    let completed=false
+    try{await api.call('suggest');openPanel('prompts');completed=true}
+    finally{setBusy(false);setJobLabel(completed?'Suggestions ready':'Needs attention')}
+  })}
   const searchReferences=()=>guard(async()=>{setBusy(true);setJobLabel('Choose references in the search window');const data=await api.call('references');setReferences(data.references||[]);setBusy(false);setSuggestions(null);setJobLabel('Ready');setActivity(p=>[...p,{type:'references',text:data.cancelled?'Reference search closed':`${data.selected_references} references selected · ${data.saved_vault_notes?.length||0} notes saved in Photo Vault`}])})
   const setup=async(group:string)=>guard(async()=>{setBusy(true);setSetupMessage('');setJobLabel('Verifying setup');const data=await api.call('setup',{group});setBusy(false);setSetupMessage(data.restartRecommended?'Setup complete. Restart Photo Studio before model editing.':'Component installed and verified.');await refresh()})
   const showResult=async(item:any)=>{setResult(item);openPanel('review')}

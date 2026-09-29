@@ -199,6 +199,55 @@ def decode_working(data, bit_depth=16, allow_8bit=False):
             notes.append('No ICC profile: assumed sRGB')
         return np.ascontiguousarray(pixels), notes
 
+def sony_preview(data):
+    """Read the camera's embedded JPEG for display only, never decode/edit RAW pixels."""
+    import tifffile
+    from itertools import islice
+
+    message = 'Sony RAW preview is missing or unreadable. Choose another photo or export a JPEG/TIFF preview from Lightroom. The RAW original is unchanged.'
+    try:
+        candidates = []
+        with tifffile.TiffFile(io.BytesIO(data)) as tif:
+            # Sony stores previews in the main IFD chain; SubIFDs hold sensor data.
+            for page in islice(tif.pages, 32):
+                def scalar(code, default=None):
+                    tag = page.tags.get(code)
+                    value = tag.value if tag else default
+                    if isinstance(value, tuple):
+                        return value[0] if len(value) == 1 else None
+                    return value
+                offset, length = scalar(513), scalar(514)
+                if not isinstance(offset, int) or not isinstance(length, int):
+                    continue
+                if offset < 8 or not 0 < length <= 64*1024*1024 or offset + length > len(data):
+                    continue
+                jpeg = data[offset:offset+length]
+                if not jpeg.startswith(b'\xff\xd8'):
+                    continue
+                with warnings.catch_warnings():
+                    warnings.simplefilter('error', Image.DecompressionBombWarning)
+                    with Image.open(io.BytesIO(jpeg)) as image:
+                        if image.format != 'JPEG': continue
+                        validate_dimensions(image.width, image.height)
+                        orientation = image.getexif().get(274, scalar(274, 1))
+                        candidates.append((image.width*image.height, offset, length, orientation))
+        if not candidates: raise ValueError(message)
+        _, offset, length, orientation = max(candidates, key=lambda item: item[0])
+        jpeg = data[offset:offset+length]
+        # Reuse the raster decoder's ICC handling. It already applies any JPEG
+        # orientation; use the enclosing TIFF's orientation only when absent.
+        with Image.open(io.BytesIO(jpeg)) as embedded:
+            has_orientation = 274 in embedded.getexif()
+        image, _ = decode(jpeg)
+        if not has_orientation:
+            image.getexif()[274] = orientation
+            image = ImageOps.exif_transpose(image)
+        return image
+    except (tifffile.TiffFileError, ValueError, OSError, SyntaxError,
+            Image.DecompressionBombError, Image.DecompressionBombWarning) as error:
+        raise ValueError(message) from error
+
+
 def preview(array, max_size=None):
     if max_size:
         h, w = array.shape[:2]

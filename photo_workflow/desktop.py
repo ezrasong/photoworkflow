@@ -242,11 +242,14 @@ class Desktop:
         if method=='preview':
             import base64
             import io
-            from .imaging import decode_working, preview
+            from .imaging import decode_working, preview, sony_preview
             from .references import local_path
             path=local_path(args.get('path',''))
             if path.stat().st_size>512*1024*1024:raise ValueError('Preview source too large')
-            pixels,_=decode_working(path.read_bytes());image=preview(pixels)
+            data=path.read_bytes()
+            if path.suffix.lower()=='.arw': image=sony_preview(data)
+            else:
+                pixels,_=decode_working(data);image=preview(pixels)
             if not args.get('full'): image.thumbnail((1800,1200))
             output=io.BytesIO();image.save(output,format='PNG')
             return 'data:image/png;base64,'+base64.b64encode(output.getvalue()).decode('ascii')

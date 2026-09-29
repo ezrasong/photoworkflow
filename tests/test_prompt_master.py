@@ -4,15 +4,88 @@ import unittest
 import urllib.request
 from pathlib import Path
 import tempfile
-from unittest.mock import Mock
+from contextlib import ExitStack, nullcontext
+from unittest.mock import Mock, patch
 from photo_workflow.prompt_master import validate_rewrite, suggest
 
 
 class PromptMasterTests(unittest.TestCase):
+    def test_selected_photo_inspection_and_retry(self):
+        from photo_workflow.prompt_chat import PromptWorkspace
+        from photo_workflow import lightroom
+        from photo_workflow.desktop import Desktop
+        valid={'summary':'Visible shadow noise.', 'prompts':['Reduce shadow noise gently.']}
+        with tempfile.TemporaryDirectory() as directory, ExitStack() as stack:
+            root=Path(directory).resolve()
+            source=root/'intended.arw'; source.write_bytes(b'original fixture')
+            raster=root/'intended.png'; raster.write_bytes(b'raster fixture')
+            queue=root/'queue'; queue.mkdir()
+            preview=queue/'render.tif'; preview.touch()
+            workspace=PromptWorkspace()
+            stack.enter_context(patch.object(lightroom,'QUEUE',queue))
+            stack.enter_context(patch('photo_workflow.desktop.ROOT',root))
+            stack.enter_context(patch('photo_workflow.prompt_chat.ROOT',root))
+            stack.enter_context(patch('photo_workflow.native_batch.connect_lightroom',return_value={'catalog':'fixture-catalog'}))
+            stack.enter_context(patch('photo_workflow.pipeline.job_lock',return_value=nullcontext()))
+            inspection=stack.enter_context(patch('photo_workflow.vision.inspect',return_value={
+                'observations':json.dumps(valid),'backend':'fixture'}))
+            bridge=stack.enter_context(patch.object(lightroom,'request'))
+            desktop=Desktop.__new__(Desktop)
+            desktop.guard=threading.Lock(); desktop.busy=False; desktop.cancel_file=None
+            desktop.workspace=workspace; desktop.broker=Mock(inference_lock=threading.Lock())
+            desktop.record=Mock()
+
+            with self.assertRaisesRegex(ValueError,'Choose a photo'):
+                desktop.dispatch('suggest',{})
+            source_folder=root/'photos'; source_folder.mkdir()
+            (source_folder/'one.png').touch(); (source_folder/'two.png').touch()
+            workspace.select_source(source_folder)
+            with self.assertRaisesRegex(ValueError,'Choose one existing photo'):
+                desktop.dispatch('suggest',{})
+            self.assertFalse(desktop.busy); self.assertIsNone(desktop.cancel_file)
+            bridge.assert_not_called(); inspection.assert_not_called()
+
+            # Raster selection never consults unrelated Lightroom targets.
+            workspace.select_source(raster)
+            self.assertEqual(desktop.dispatch('suggest',{})['source'],str(raster))
+            self.assertEqual(inspection.call_args.args[0],[('SOURCE photograph',raster)])
+            bridge.assert_not_called()
+            raster.unlink()
+            with self.assertRaisesRegex(ValueError,'Choose one existing photo'):
+                desktop.dispatch('suggest',{})
+
+            workspace.select_source(source)
+            for error in ('No photo selected in Lightroom. Select the intended photo, then retry.',
+                          'Select exactly one photo in Lightroom, then retry.',
+                          'Selection or catalog changed; read selection again'):
+                bridge.side_effect=[{'selection':'fixture-token'},RuntimeError(error)]
+                count=inspection.call_count
+                with self.assertRaisesRegex(RuntimeError,error):
+                    desktop.dispatch('suggest',{})
+                self.assertEqual(inspection.call_count,count)
+                self.assertIsNone(workspace.source)
+                self.assertFalse(desktop.busy); self.assertIsNone(desktop.cancel_file)
+            # Explicit retry reimports the intended app source and uses the fresh token/catalog.
+            bridge.reset_mock()
+            bridge.side_effect=[{'selection':'fresh-token'},{'path':str(preview)}]
+            result=desktop.dispatch('suggest',{})
+            self.assertEqual(result['prompts'],valid['prompts'])
+            self.assertEqual(result['source'],str(source))
+            self.assertEqual([call.args[0] for call in bridge.call_args_list],['import_photo','export'])
+            self.assertEqual(bridge.call_args_list[0].kwargs['source'],source)
+            self.assertEqual(bridge.call_args_list[1].args,('export','fresh-token'))
+            self.assertTrue(all(call.kwargs['catalog']=='fixture-catalog' for call in bridge.call_args_list))
+            self.assertEqual(inspection.call_args.args[0],[('SOURCE photograph',preview)])
+            self.assertFalse(desktop.busy); self.assertIsNone(desktop.cancel_file)
+            self.assertEqual(source.read_bytes(),b'original fixture')
+            self.assertIsNone(workspace.job)
+            self.assertEqual(desktop.record.call_args.args[0]['type'],'prompt_suggestions')
+
     def test_suggestions_inspect_only_and_validate_model_output(self):
-        workspace=Mock(selected_input=Path('photo.png'))
         valid={'summary':'Slight shadow noise; texture is visible.', 'prompts':['Reduce shadow noise gently; preserve texture.']}
         with tempfile.TemporaryDirectory() as directory:
+            source=Path(directory)/'photo.png'; source.touch()
+            workspace=Mock(selected_input=source)
             marker=Path(directory)/'cancel'
             workspace.call.return_value={'observations':json.dumps(valid),'backend':'local-fixture'}
             result=suggest(workspace,threading.Lock(),marker)

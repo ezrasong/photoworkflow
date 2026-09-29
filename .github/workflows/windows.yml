@@ -56,7 +56,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tests/verify_creative_mcp.py
       - name: Prompt authorization tests
-        run: .cache/packaging/bundle/python/python.exe -m unittest tests.test_prompt_master tests.test_focus tests.test_vault_references
+        run: .cache/packaging/bundle/python/python.exe -m unittest tests.test_prompt_master tests.test_focus tests.test_vault_references tests.test_sony_preview tests.test_lightroom_selection
       - name: Export precision tests
         run: .cache/packaging/bundle/python/python.exe -m unittest tests.test_export_quality
       - name: Install locked desktop dependencies
@@ -88,6 +88,9 @@ jobs:
       - name: Responsive layout acceptance
         working-directory: desktop
         run: npm run test:layout
+      - name: Selection and suggestion UI acceptance
+        working-directory: desktop
+        run: npm run test:ui
       - name: Installer checksums
         shell: pwsh
         run: |
@@ -128,7 +131,7 @@ jobs:
             metadata=$(find artifacts -type f -name latest.yml -print -quit)
             test -n "$metadata" && test -s "$metadata"
             if [ "$existing" != "true" ]; then
-              gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft --title "Photo Studio $GITHUB_REF_NAME" --notes "Windows x64 photo desktop with private GitHub updates. Install this version once, then enable updates in Settings with read-only repository access. See repository verification notes and limitations."
+              gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft --title "Photo Studio $GITHUB_REF_NAME" --notes "Windows x64 photo desktop with automatic public GitHub updates; no token required. Includes verified Lightroom selection for prompt suggestions, reliable inspection error recovery, and Sony RAW previews. Existing installations without update access need this installer once. See repository verification notes and limitations."
             fi
             find artifacts -type f \( -name '*Setup.exe' -o -name '*.sha256' -o -name '*.blockmap' -o -name 'latest.yml' \) -exec gh release upload "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --clobber {} +
             gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false --latest

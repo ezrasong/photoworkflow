@@ -88,7 +88,7 @@ async function start(){
   }
   const updates=createUpdates(state=>{if(!win.isDestroyed())win.webContents.send('photo:event',{type:'updates',...state})},()=>busy||closing||pending.size>0,stopBackend)
   const updatesReady=updates.initialize()
-  ipcMain.handle('photo:updates',async(event,action,value)=>{validateCaller(event);await updatesReady;if(closing)throw new Error('Photo Studio is closing');return updates.command(action,value)})
+  ipcMain.handle('photo:updates',async(event,action)=>{validateCaller(event);await updatesReady;if(closing)throw new Error('Photo Studio is closing');return updates.command(action)})
   win.on('closed',updates.dispose)
   ipcMain.handle('photo:call',async(event,method,args)=>{
     validateCaller(event)
@@ -118,9 +118,9 @@ async function start(){
   ipcMain.handle('photo:preview',async(event,path,full=false)=>{
     validateCaller(event);const actual=await permitted(path)
     if(typeof full!=='boolean')throw new Error('Invalid preview mode')
-    if(!['.png','.jpg','.jpeg','.tif','.tiff'].includes(extname(actual).toLowerCase()))throw new Error('Preview appears after RAW/HEIF preparation')
+    if(!['.png','.jpg','.jpeg','.tif','.tiff','.arw'].includes(extname(actual).toLowerCase()))throw new Error('Preview appears after RAW/HEIF preparation')
     if((await fs.stat(actual)).size>512*1024*1024)throw new Error('Preview source exceeds 512 MiB')
-    if(full||['.tif','.tiff'].includes(extname(actual).toLowerCase()))return await send('preview',{path:actual,full})
+    if(full||['.tif','.tiff','.arw'].includes(extname(actual).toLowerCase()))return await send('preview',{path:actual,full})
     const img=nativeImage.createFromPath(actual)
     if(img.isEmpty())return await send('preview',{path:actual})
     return img.resize({width:Math.min(1600,img.getSize().width)}).toDataURL()

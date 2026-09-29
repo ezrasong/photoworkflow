@@ -6,7 +6,7 @@ the assistant, and a Python photo pipeline.
 
 ## Install and use
 
-Download the Windows x64 installer from this private repository's Releases page.
+Download the Windows x64 installer from this repository's public Releases page.
 The installer downloads and verifies **all app-managed components before it
 finishes**: CUDA runtime, photo and assistant models, Oh My Pi, and Obsidian with
 Photo Vault (about 34.7 GiB of downloads; allow 105 GiB free for extraction).
@@ -21,16 +21,16 @@ and NVIDIA driver must already be installed separately.
 
 ### Automatic updates
 
-Install version 0.1.7 once to enable the updater; older builds cannot update themselves.
-In **Settings > App updates**, enter a GitHub fine-grained token restricted to this
-repository with **Contents: read-only** permission. Photo Studio stores it encrypted
-with your Windows account; no shared token is bundled in the application.
+Version 0.1.10 enables automatic updates without a GitHub account or token.
+Existing versions with update access already configured can fetch this release;
+otherwise install 0.1.10 once to enable token-free updates. Previously saved tokens
+are no longer read or sent by the new version.
 
-The app checks the private release channel on launch and every six hours, downloads
+The app checks the public release channel on launch and every six hours, downloads
 new stable installers, and verifies their SHA-512 digest. Choose **Restart and install
 update** when idle. Active editing is never interrupted by an automatic restart;
-normal app exit does not install updates. **Disconnect updates** removes saved access.
-Network/authentication failures leave the current installation working. Your workspace
+normal app exit does not install updates.
+Network failures leave the current installation working. Your workspace
 remains outside the install directory, and setup resumes changed component downloads.
 
 Windows can be resized down to 640×480. Use the menu for navigation; narrower

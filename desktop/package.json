@@ -1,6 +1,6 @@
 {
   "name": "photo-workflow",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "private": true,
   "description": "Private local photo editing, restoration and review",
   "author": "Photo Studio contributors",
@@ -74,7 +74,7 @@
         "provider": "github",
         "owner": "ezrasong",
         "repo": "photoworkflow",
-        "private": true,
+        "private": false,
         "releaseType": "release"
       }
     ]

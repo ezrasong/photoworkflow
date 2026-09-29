@@ -30,6 +30,8 @@ Return only JSON: {"summary":"visible findings and uncertainty",
 def suggest(workspace, lock, cancel_file):
     """Inspect selected context without submitting a prompt or granting edit consent."""
     with lock:
+        if not workspace.selected_input or not workspace.selected_input.is_file():
+            raise ValueError('Choose one existing photo in Photo Studio, then retry prompt suggestions. Folders cannot be inspected for suggestions.')
         review = workspace.call('inspect_photo', {
             'path': '', 'focus': SUGGESTIONS, 'view': 'source',
             'include_references': True}, cancel_file)

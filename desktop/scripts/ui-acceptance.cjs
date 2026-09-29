@@ -44,6 +44,8 @@ async function close(){await app.close();app=null}
  await button('＋ New session').click();await button('Send ↑').waitFor()
  await page.waitForFunction(()=>!document.querySelector('.selection button').disabled)
  await button('Settings').click()
+ await button('Check for updates').waitFor()
+ assert.equal(await page.getByLabel('GitHub update token').count(),0)
  await drop([first],false);await page.getByText('Drop to add original image.',{exact:true}).waitFor()
  await drop([first]);await selected('first.png');assert.equal(await page.locator('#workspace-panel').isVisible(),true)
  await page.getByAltText('Original image to edit',{exact:true}).waitFor()
@@ -58,6 +60,17 @@ async function close(){await app.close();app=null}
  await fixture({pick:[home]});await button('Folder').click();await selected(path.basename(home));assert.equal(await page.locator('.original-thumbnail').count(),0)
  await drop([first]);await selected('first.png')
  checks.push('Picker cancellation, photo selection and folders retain the common workflow; unsupported previews clear stale pixels')
+ const sony=path.join(home,'sony.ARW'),corruptRaw=path.join(home,'corrupt.ARW')
+ await fs.writeFile(sony,'RAW decoder is tested by Python fixtures');await fs.writeFile(corruptRaw,'invalid RAW')
+ await fixture({pick:[sony]});await button('Choose photo').click();await selected('sony.ARW')
+ await page.getByAltText('Original image to edit',{exact:true}).waitFor()
+ assert.ok(await app.evaluate((_,sony)=>global.fixture.calls.some(c=>c.method==='preview'&&c.args.path===sony),sony))
+ await drop([corruptRaw]);await selected('corrupt.ARW');assert.equal(await page.locator('.original-thumbnail').count(),0)
+ await page.getByText(/Original selected. Preview unavailable:/).waitFor()
+ await drop([sony]);await selected('sony.ARW');await page.getByAltText('Original image to edit',{exact:true}).waitFor()
+ assert.equal(await page.getByText(/Original selected. Preview unavailable:/).count(),0)
+ await drop([first]);await selected('first.png')
+ checks.push('Sony ARW picker/drop routes preview to the backend; failed RAW preview clears stale pixels and a corrected selection recovers')
  for(const files of [[path.join(home,'bad.txt')],[first,second],[path.join(home,'missing.png')]]){
   await drop(files);await page.getByRole('alert').waitFor();await selected('first.png');await page.getByAltText('Original image to edit',{exact:true}).waitFor()
  }
@@ -73,6 +86,32 @@ async function close(){await app.close();app=null}
  assert.equal(await app.evaluate(()=>global.fixture.calls.filter(c=>c.method==='select').length),beforeBusy)
  await app.evaluate(()=>global.fixture.event({type:'prompt_result'}));await selected('second.png')
  checks.push('Overlapping selections and busy jobs reject drops without unlocking the current operation')
+ await detailTab('prompts').click()
+ const suggestButton=page.locator('#detail-panel-prompts').getByRole('button',{name:'Suggest prompts from photo',exact:true})
+ for(const error of [
+  'No photo selected in Lightroom. Select the intended photo, then retry.',
+  'Select exactly one photo in Lightroom, then retry.',
+  '[string "Bridge.lua"]:51: Selection or catalog changed; read selection again'
+ ]){
+  await fixture({delaySuggest:300,suggestError:error});await suggestButton.click()
+  await page.locator('.state').filter({hasText:'Inspecting photo for prompt suggestions'}).waitFor()
+  assert.equal(await button('Choose photo').isDisabled(),true)
+  await page.getByRole('alert').filter({hasText:error}).waitFor()
+  await page.locator('.state').filter({hasText:'Needs attention'}).waitFor()
+  assert.equal(await page.getByText('Inspecting photo for prompt suggestions',{exact:true}).count(),0)
+  assert.equal(await suggestButton.isEnabled(),true)
+  assert.equal(await button('Choose photo').isEnabled(),true)
+ }
+ // Correct the app selection and retry through production IPC after rejection.
+ await fixture({pick:[first],suggestError:''});await button('Choose photo').click();await selected('first.png')
+ await detailTab('prompts').click();await suggestButton.click()
+ await page.locator('.state').filter({hasText:'Suggestions ready'}).waitFor()
+ await page.getByText('Visible shadow noise.',{exact:true}).waitFor()
+ assert.equal(await suggestButton.isEnabled(),true)
+ assert.equal(await page.getByRole('alert').count(),0)
+ assert.equal(await page.getByText('Inspecting photo for prompt suggestions',{exact:true}).count(),0)
+ await fixture({delaySuggest:0});await detailTab('controls').click()
+ checks.push('Suggestion success, missing/multiple selections and bridge rejection clear inspection state; correction and retry succeed through real IPC')
  await page.getByLabel('Photo instructions').fill('Keep this draft')
  await page.getByLabel('Operation',{exact:true}).selectOption('focus');await page.getByLabel('Focus correction strength').fill('0.5')
  await detailTab('review').click();await button('Fixture result').click();await button('100% pixels').click();await page.getByLabel('Before and after split').fill('32')
