@@ -36,7 +36,7 @@ async function close(){
   const state=await page.evaluate(()=>window.photo.call('status'))
   console.log('Status received')
   const updateState=await page.evaluate(()=>window.photo.updates('status'))
-  assert.equal(updateState.version,'0.1.7')
+  assert.equal(updateState.version,require('../package.json').version)
   assert.ok(!('token' in updateState))
   await assert.rejects(page.evaluate(()=>window.photo.updates('shell')))
   evidence.checks.push('Packaged updater starts and rejects unknown actions without exposing credentials')
