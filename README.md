@@ -21,9 +21,9 @@ and NVIDIA driver must already be installed separately.
 
 ### Automatic updates
 
-Version 0.1.10 enables automatic updates without a GitHub account or token.
+Version 0.1.11 enables automatic updates without a GitHub account or token.
 Existing versions with update access already configured can fetch this release;
-otherwise install 0.1.10 once to enable token-free updates. Previously saved tokens
+otherwise install 0.1.11 once to enable token-free updates. Previously saved tokens
 are no longer read or sent by the new version.
 
 The app checks the public release channel on launch and every six hours, downloads

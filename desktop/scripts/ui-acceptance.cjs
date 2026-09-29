@@ -11,6 +11,10 @@ async function launch(){
  const env={...process.env,PHOTOWORKFLOW_HOME:home};delete env.ELECTRON_RUN_AS_NODE
  app=await electron.launch({executablePath:require('electron'),args:[path.resolve(__dirname,'../tests/fixtures/ui-main.cjs')],env})
  page=await app.firstWindow();page.on('pageerror',e=>errors.push(String(e)));cdp=await page.context().newCDPSession(page)
+ // Windows can clamp the initial BrowserWindow to a hosted runner's small
+ // display. Set the content size after creation, as the layout suite does.
+ await app.evaluate(({BrowserWindow})=>{const window=BrowserWindow.getAllWindows()[0];window.webContents.setZoomFactor(1);window.setContentSize(1440,960)})
+ await page.reload();await page.waitForFunction(()=>innerWidth===1440&&innerHeight===960)
  const profiles=await app.evaluate(({app})=>[app.getPath('userData'),app.getPath('sessionData')])
  for(const profile of profiles)assert.ok(profile.startsWith(home+path.sep),'Test profile escaped fixture home: '+profile)
  await button('Add tab').waitFor()

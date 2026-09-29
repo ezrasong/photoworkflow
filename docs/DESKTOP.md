@@ -233,7 +233,7 @@ CI publishes the release as a draft, uploads all assets, then marks it latest on
 after validation. Reruns preserve published releases and can finish a partial draft.
 Version tags must match desktop/package.json.
 
-Version 0.1.10 uses the public GitHub provider without credentials. Legacy saved
+Version 0.1.11 uses the public GitHub provider without credentials. Legacy saved
 tokens are never read or sent. The update bridge shares renderer/frame validation
 with existing capabilities and exposes only status, check and install. No generic
 URL or process launch is exposed. Older installations with configured update access
